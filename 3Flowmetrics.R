@@ -5,13 +5,13 @@ library(lubridate)
 library(zoo)
 
 # set working directory
-HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_RDS/HPK_OG/HPK_sm_OG/"
+HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_CA/HPK_sm"
 
-site_list <- list.files(path = HPK_Path, "_ct.rds")#remove sites not needed
+site_list <- list.files(path = HPK_Path, "_ct.csv")#remove sites not needed
 
 for (j in 1:length(site_list)) {
   
-  kk = readRDS(paste(HPK_Path, site_list[j], sep = ""))
+  kk = read.csv(paste(HPK_Path, site_list[j], sep = ""))# check, might get error
   
   kk <- kk %>% mutate(nhour = hour(datetime)) %>% mutate(datetime = date(datetime))
   

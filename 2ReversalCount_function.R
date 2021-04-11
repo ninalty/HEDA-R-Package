@@ -22,6 +22,7 @@ HPK_Count_Pre <- function(x){ #X is dataframe
   # order the data by date
   x <- x %>% arrange(datetime, .by_group = TRUE) 
   
+  # cut the head and foot to get rid of small fluctuations
   y <- x %>% 
     mutate(flow_80th = quantile(parameter_value, probs = 0.9)) %>% 
     mutate(flow_20th = quantile(parameter_value, probs = 0.1)) %>% 
@@ -36,8 +37,7 @@ HPK_Count_Pre <- function(x){ #X is dataframe
   ## replace the small value of dift_dis with 0.
   y <- y %>% mutate(dift_dis = ifelse(abs(dift_dis) < 20, 0, dift_dis))
   
-  ##### replace didft_dis < ann_thre*0.03, 0.03 was chosen based on the dataset.
-  
+  ##### replace didft_dis < ann_thre*0.03, 0.03 was chosen based on the dataset.  
   y <- y %>% 
     mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*aerfa1, 0, dift_dis)) %>%
     ungroup()
@@ -45,7 +45,7 @@ HPK_Count_Pre <- function(x){ #X is dataframe
   return(y)
 }
 
-## Adjust the flow based on the adjusted dift_dis, df is list
+## Update the discharge based on the adjusted dift_dis, df is list
 Q_adj_bydift <- function(df){
   
   n = nrow(df)-1
@@ -363,7 +363,7 @@ clean_conectS <- function(df){
   return(df)}
 
 ###---------------------------------------------------put two function into one------------------------------------------------
-
+# not sure whether used it
 clean_Spt <- function(df){
   df <- clean_cotinpt(df)
   df <- clean_conectS(df)

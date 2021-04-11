@@ -1,5 +1,5 @@
 # set working directory
-HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_RDS/HPK_OG/HPK_sm_OG/"
+HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_RDS/HPK_CA/HPK_sm"
 
 site_list <- list.files(path = HPK_Path, "_sm.csv")
 
@@ -42,7 +42,7 @@ for (j in 1:length(site_list)) {
   kk2_ct <- clean_Spt(kk2_ct)  
   
   #save the data
-  saveRDS(kk2_ct, paste(HPK_Path, kk2_ct$location_id[1], "_ct.rds", sep = ""))
+  write.csv(kk2_ct, paste(HPK_Path, kk2_ct$location_id[1], "_ct.csv", sep = ""))
   
 }
 

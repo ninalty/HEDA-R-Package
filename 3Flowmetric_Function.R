@@ -7,7 +7,7 @@ up_dw_ID <- function(df){
   
   df$up <- rep(NA, nrow(df))
   df$dw <- rep(NA, nrow(df))
-  index_lt <- which(df$dgtag %in% c(1,2,3,4))
+  index_lt <- which(df$dgtag %in% c(1,2,3,4))# check why these numbers
   n <- length(index_lt)-1
   
   tt <- 1
@@ -59,7 +59,7 @@ up_dw_ID <- function(df){
 
   return(df)}  
 
-# ------------------------------------    version 2   -------------------
+# count pk_no
 up_dw_count <- function(df){
   
   up_no <- df %>% group_by(datetime) %>% filter(up=="up0") %>% count()
@@ -77,6 +77,7 @@ up_dw_count <- function(df){
   
   return(daily_pk_no)}
 
+
 #calculate the pk ratio 
 PK_Ratio <- function(df1, df2){
 
@@ -87,66 +88,6 @@ PK_Ratio <- function(df1, df2){
   return(row_no)
 }
 
-## weekly pk
-up_dw_count_wk <- function(df){
-  
-  df$weekid <- week(df$datetime)
-  
-  gage_id <- unique(df$location_id)
-  
-  df <- df %>% mutate(yr_week = paste(yr,weekid,sep = "-"))
-  
-  up_no <- df %>% group_by(yr_week) %>% filter(!is.na(up)==TRUE) %>% count(up) %>% ungroup()
-  dw_no <- df %>% group_by(yr_week) %>% filter(!is.na(dw)==TRUE) %>% count(dw) %>% ungroup()
-  
-  daily_pk_no <- full_join(up_no,dw_no, by="yr_week")
-  
-  # fix the na value of n
-  daily_pk_no$n.x <- ifelse(is.na(daily_pk_no$n.x), 0, daily_pk_no$n.x) 
-  daily_pk_no$n.y <- ifelse(is.na(daily_pk_no$n.y), 0, daily_pk_no$n.y)
-  daily_pk_no$yr <- with(daily_pk_no, substr(yr_week, start=1, stop=4))
-  
-  #add up and dw together by day
-  daily_pk_no$pk_no <- (daily_pk_no$n.x + daily_pk_no$n.y)/2
-  
-  #average the pk_no
-  mean_pk <- mean(daily_pk_no$pk_no)
-  
-  daily_pk_no$pk_no_mean <- rep(mean_pk,nrow(daily_pk_no))
-  
-  #add gage id
-  daily_pk_no$location_id <- rep(gage_id, nrow(daily_pk_no))
-  
-  return(daily_pk_no)}
-
-## mth pk
-up_dw_count_mth <- function(df){
-  
-  gage_id <- unique(df$location_id)
-  df <- df %>% mutate(yr_mth = paste(yr,mth,sep = "-"))
-  
-  up_no <- df %>% group_by(yr_mth) %>% filter(!is.na(up)==TRUE) %>% count(up) %>% ungroup()
-  dw_no <- df %>% group_by(yr_mth) %>% filter(!is.na(dw)==TRUE) %>% count(dw) %>% ungroup()
-  mth_pk_no <- full_join(up_no,dw_no, by="yr_mth")
-  
-  # fix the na value of n
-  mth_pk_no$n.x <- ifelse(is.na(mth_pk_no$n.x), 0, mth_pk_no$n.x) 
-  mth_pk_no$n.y <- ifelse(is.na(mth_pk_no$n.y), 0, mth_pk_no$n.y)
-  mth_pk_no$yr <- with(mth_pk_no, substr(yr_mth, start=1, stop=4))
-  mth_pk_no$mth <- with(mth_pk_no, substr(yr_mth, start=6, stop=7))
-  
-  #add up and dw together by day
-  mth_pk_no$pk_no <- (mth_pk_no$n.x + mth_pk_no$n.y)/2
-  
-  #average the pk_no
-  mean_pk <- mean(mth_pk_no$pk_no)
-  
-  mth_pk_no$pk_no_mean <- rep(mean_pk,nrow(mth_pk_no))
-  
-  #add gage id
-  mth_pk_no$location_id <- rep(gage_id, nrow(mth_pk_no))
-  
-  return(mth_pk_no)}
 
 # ramping rate
 HPK_ramprt_duration <- function(df){
@@ -247,60 +188,4 @@ HPK_ramprt_duration <- function(df){
       }}}
   #print("Done!")
   return(df)
-}
-
-# get the occurence probability of the peaking time
-PK_Pb <- function(df){
-  df = table(df)
-  df = data.frame(df/sum(df)*100)
-  names(df) <- c("Var","Freq")
-  df$Var <- as.numeric(levels(df$Var))
-  df$Freq <- as.numeric(df$Freq)
-  df <- with(df, sum(Var*Freq/100))
-  return(df)}
-
-# frequency of metrics
-Metric_freq <- function(df, nz=TRUE){
-  if (nz==TRUE){
-    df <- na.omit(df)
-    df <- (df - min(df))/(max(df)-min(df))
-    p <- hist(df)
-    p$density <- p$counts/sum(p$counts)*100
-    return(p)}
-  else{
-    df <- na.omit(df)
-    p <- hist(df)
-    p$density <- p$counts/sum(p$counts)*100
-    return(p)
-  }
-}
-
-## ----------------------------------  plot count ------------------------------
-#plot 1
-boxplot_pkNo <- function(df){
-  
-  df$yr <- factor(df$yr)
-  
-  ggplot(df)+geom_boxplot(aes(x=location_id, y=pk_no), outlier.alpha = 0.1) + labs(x = "Site", y="Peak No.") +
-    theme(panel.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_rect(colour = "black", fill=NA),
-          axis.text.x = element_text(angle = 30, size=12), axis.title.y = element_text(size = 12))
-  ggsave(paste(unique(df$location_id),"_PK_NO.png"), width = 40, height = 20, units = "cm")
-}
-
-# plot 2
-boxplot_pkNo_mth <- function(df){
-  
-  df$mth <- factor(df$mth)
-  
-  ggplot(df)+geom_boxplot(aes(x=mth, y=pk_no), outlier.alpha = 0.1) + labs(x = "Time", y="Peak No.") + geom_jitter(aes(x=mth, y=pk_no), width = 0.25)+
-    theme(panel.background = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_rect(colour = "black", fill=NA),
-          axis.text.x = element_text(angle = 30, size=12), axis.title.y = element_text(size = 12))
-  ggsave(paste(unique(df$location_id),"_PK_NO_bymth.png"),path = "D:/Ninalty/Hydropeaking/RWork/4_HPK_Flowmetrics/HPK_No_Output/Peaking_No/Monthly/", width = 40, height = 20, units = "cm")
-}
-
-# plot 3
-densityplot_pkNo <- function(df){
-  ggplot(df, aes(x=pk_no))+
-    geom_bar()
-  ggsave(paste(unique(df$location_id),"_PK_NO_Dens.png"), width = 40, height = 20, units = "cm")
 }
