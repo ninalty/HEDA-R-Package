@@ -1,0 +1,380 @@
+---
+title: "R_4Metric_Explanation"
+author: "Nina Li"
+date: "Sep 30, 2020"
+output: html_document
+---
+Flow metric explanation
+```{r}
+library(vegan)
+library(plotly)
+library(vegan3d)
+library(rpart)
+```
+
+Dimension check
+```{r}
+#change the row name to the group
+rownames(HPK_SM_metric2) <- as.vector(sub_grp_fuzc) #external input
+
+distDf <- dist(HPK_SM_metric2, method = "euclidean")
+
+# In this part, we define a function NMDS.scree() that automatically 
+# performs a NMDS for 1-10 dimensions and plots the nr of dimensions vs the stress
+NMDS.scree <- function(x) { #where x is the name of the data frame variable
+  plot(rep(1, 6),
+       replicate(6, metaMDS(x, autotransform = F, k = 1)$stress), 
+       xlim = c(1, 6),
+       ylim = c(0, 0.30), 
+       xlab = "# of Dimensions", ylab = "Stress", main = "NMDS stress plot")
+  for (i in 1:8) {
+    points(rep(i + 1,6),
+           replicate(6, metaMDS(x, autotransform = F, k = i + 1)$stress))
+  }
+}
+
+NMDS.scree(distDf)
+```
+
+Based on the stress plot, 3 & 4 will be appropriate dimensions
+```{r}
+nmds <- metaMDS(HPK_SM_metric2, k=3, try=100, maxit = 200, plot=FALSE, 
+                 autotransform = FALSE, noshare = FALSE, distance = "euclidean")
+
+```
+
+The stress value is smaller than 0.1 which is good enough
+```{r}
+stressplot(nmds)
+```
+
+```{r}
+#Prepare data for the following analysis
+nmds.points <- data.frame(nmds$points)
+
+nmds.points$group <- as.factor(sub_grp_fuzc)# external input
+
+colnames(nmds.points) <- c("NMDS1", "NMDS2", "NMDS3", "group")
+```
+
+Principle component analysis
+Based on the NMDS plot, I actually didn't see anything. I doubt whether I should use this method. Should check the application of NMDS in hydrology.
+But having NMDS and PCA together provides me a full picture on the relationship between the structure of community and the environmental attributes.
+
+PCA
+1.Based on the summary info, PC1 has the highest correlation with the distribution of variation, but the standard deviation is high too. Then is PC2. PC2 & PC3 have similar Eigenvalue.
+2.All the hydrologic variables are positively related to the structure of the classified group. It means that the higher the value of all the environmental variables, the higher the intensity of the hydropeaking group is.
+```{r}
+# rescale_df is a rescaled (0 to 1) dataframe
+pcVectors <- function(rescale_df) {
+  
+  pc_analysis<-prcomp(rescale_df) # performs principal component analysis
+  
+  env_vectors<-envfit(nmds, rescale_df) # fits vectors of variables
+  
+  return(list(env_vectors, pc_analysis))
+}
+
+pcOut <- pcVectors(HPK_SM_metric2)
+
+envVectors <- pcOut[[1]]
+
+pcaAnalysis <- pcOut[[2]]
+
+summary(pcaAnalysis)
+```
+
+As for the component of each principle axies, in PC1, pk_ratio is the dominant factor, then is the duration of the up and down ramping process. In PC2, duration of the down ramping process is the dominant factor. Then is the pk_no.
+```{r}
+pcaAnalysis
+```
+
+It told me that Qpeak and Retention of the high peaking discharge is not significantly different from each as what the correlation matrix said. But I still keep them as they represent different features of hydropeaking. From another perspective, Qpeak and retention_up are positively realted to each other which implies that hydropower plants who conduct high magnitude of peaking flow also tend to have higher duration of the peaking discharge.
+```{r}
+pca.scr <- data.frame(scores(envVectors, display = "vector"))
+```
+
+The plot below shows that all the hydrologic metrics are positively related to the variation. And for thoese related hydrologic metrics, they are positively correlated.
+
+As for the plot of sites, group 4 is clealy cut from group 1-3. Group 3 is in the middle of group 1 and group 2. The overall distribution of the groups is goverend by NMDS1. Within group 2 & 3, the separation is governed by NMDS2. 
+what if I add ellipse to each group
+```{r}
+# function for ellipsess - just run this, is used later
+veganCovEllipse<-function (cov, center = c(0, 0), scale = 1, npoints = 100) 
+  {
+    theta <- (0:npoints) * 2 * pi/npoints
+    Circle <- cbind(cos(theta), sin(theta))
+    t(center + scale * t(Circle %*% chol(cov)))
+}
+
+# data for labelling the ellipse
+NMDS.mean=aggregate(nmds.points[,c("NMDS1", "NMDS2")],list(group=nmds.points$group),mean)
+
+# get the ellipse
+rslt <- ordiellipse(nmds, groups = nmds.points$group, display = "sites", show.groups = unique(nmds.points$group), kind="ehull", draw = "none")
+
+  # Get points to plot for the ellipses.
+df_ell <- data.frame()
+for(g in unique(nmds.points$group)){
+ df_ell <- rbind(df_ell, cbind(as.data.frame(with(nmds.points[nmds.points$group==g,], veganCovEllipse(rslt[[g]]$cov,rslt[[g]]$center, rslt[[g]]$scale))), group=g))}
+
+#finally, let's plot, adds environmental vector, ellipse of group, nmds sites
+nmds_pca <- ggplot() + 
+              geom_point(data = nmds.points, aes(x=NMDS1, y=NMDS2, shape = factor(group, levels = c("G1","G2","G3","G4"))), size = 5) + 
+              theme(panel.background = element_blank(), 
+                    panel.grid.major = element_blank(), 
+                    panel.grid.minor = element_blank(), 
+                    panel.border = element_rect(colour = "black", fill=NA), 
+                    axis.title.x = element_text(size=19), 
+                    axis.text.x = element_text(size = 17), 
+                    axis.text.y = element_text(size = 17), 
+                    axis.title.y = element_text(size = 19), 
+                    legend.title = element_text(size = 19), 
+                    legend.text=element_text(size = 18)) + 
+              labs(shape = "HPK Clusters") +
+              scale_shape_manual(values=c(1, 8, 2, 0)) + 
+              geom_segment(data = pca.scr, 
+                           aes(x=0, xend=NMDS1, y=0, yend=NMDS2), 
+                           arrow = arrow(length = unit(0.5, "cm")),
+                           colour="black", size = 0.7)+
+              geom_text(data=pca.scr,
+                        aes(x=NMDS1, y=NMDS2, label=rownames(pca.scr)),
+                        size=6) +
+              geom_polygon(data=df_ell, 
+                           aes(x=NMDS1, y=NMDS2, linetype=group), 
+                           alpha=0.2, 
+                           show.legend = FALSE) +
+              annotate("text",
+                       x=NMDS.mean$NMDS1,
+                       y=NMDS.mean$NMDS2,
+                       label=NMDS.mean$group,
+                       size = 6) +
+              coord_fixed()
+
+nmds_pca
+# ggsave("NMDS.png", plot = nmds_pca, path = "D:/Ninalty/UCD_Hydropeaking/HPK_Imagery/", width = 30, height = 20, units = "cm")
+```
+
+In another dimenstions
+```{r}
+# data for labelling the ellipse
+NMDS.mean=aggregate(nmds.points[,c("NMDS1", "NMDS3")],list(group=nmds.points$group),mean)
+
+# get the ellipse
+rslt <- ordiellipse(nmds, 
+                    groups = nmds.points$group, 
+                    display = "sites", 
+                    show.groups = unique(nmds.points$group), 
+                    kind="ehull", 
+                    draw = "none")
+
+  # Get points to plot for the ellipses.
+df_ell <- data.frame()
+
+for(g in unique(nmds.points$group)){
+ df_ell <- rbind(df_ell, 
+                 cbind(as.data.frame(with(nmds.points[nmds.points$group==g,],
+                                          veganCovEllipse(rslt[[g]]$cov,
+                                                          rslt[[g]]$center, 
+                                                          rslt[[g]]$scale))), 
+                       group=g))}
+
+#finally, let's plot, adds environmental vector, ellipse of group, nmds sites
+ggplot() + 
+    geom_point(data = nmds.points, aes(x=NMDS1, y=NMDS3, shape = factor(group, levels = c("G1","G2","G3","G4"))), size = 5) + 
+    theme(panel.background = element_blank(), 
+      panel.grid.major = element_blank(), 
+      panel.grid.minor = element_blank(), 
+      panel.border = element_rect(colour = "black", fill=NA), 
+      axis.title.x = element_text(size=16), 
+      axis.text.x = element_text(size = 15), 
+      axis.text.y = element_text(size = 15), 
+      axis.title.y = element_text(size = 16), 
+      legend.title = element_text(size = 17), 
+      legend.text=element_text(size = 16)) + 
+    labs(shape = "HPK Clusters") +
+    scale_shape_manual(values=c(1, 8, 2, 0)) +
+    coord_fixed()
+```
+
+Plot NMDS without the ellipse
+```{r}
+ggplot() + 
+  geom_point(data = nmds.points, 
+             aes(x=NMDS1, y=NMDS2)) +
+  theme(panel.background = element_blank(), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.border = element_rect(colour = "black", fill=NA), 
+        axis.text.x = element_text(size=12), 
+        axis.title.y = element_text(size = 12))
+```
+
+
+add surface
+```{r}
+envVectors2 <- envfit(nmds, HPK_SM_metric2, choices = 1:3)
+
+pl4 <- with(nmds.points, ordiplot3d(nmds, col = group, pch=16, angle =25,type="p", xlim = c(-1,1),zlim=c(-1,1),ylim=c(-1,1), envfit = envVectors2, arr.col = "black"))
+
+text(pl4, "arrows", col="black", pos=2)
+
+# plot(pca.scr, at = pl4$origin)
+with(nmds.points, ordiellipse(pl4, group, kind="ehull", draw = "poly", col = 1:4, alpha = 60))
+```
+
+Classification tree built on WHC clustering
+```{r}
+set.seed(84) # To remain consistent typically set this this to the same number always
+# Create formula for classification tree 
+# (Cluster groups) ~ (are a function of these attributes)
+# cartAtts - which attributes you want the classification tree to split by
+# dataDf - the dataframe with site data
+dataDf <- classed_hpk_wd
+groups <- sub_grp
+
+cartAtts <- colnames(HPK_SM_metric) # insert list of attribute names
+
+cartFormula <- paste("sub_grp", "~", paste(cartAtts, collapse = "+")) #change the sub_grp accordingly
+
+cartOut <- rpart(as.formula(cartFormula),
+                 data=dataDf, method="class", minsplit=3)
+
+# Plot figure to help choose appropriate number of branches
+plotcp(cartOut)
+```
+
+Continue ...
+```{r}
+# Enter value for appropriate number of branches
+cpValue <- 0.15#readline("CP value: ") (point below dash line)
+
+# Prune tree to appropriate number of branches
+prune_cart<-prune(cartOut, cpValue)
+
+# Evaluate misclassification rate
+pred_cart <- predict(prune_cart, dataDf, type=c("class"))
+
+misclass <- cbind(groups, pred_cart)
+
+perc_class <- nrow(misclass[misclass[,1]==misclass[,2],]) / 
+  length(misclass[,1]) * 100
+
+cat("Percent correctly classified =", perc_class, "\n")
+
+# Calculate cross-validation percentage
+rootNE <- cartOut$frame[1, 'dev']/cartOut$frame[1, 'n']
+
+cpDf <- as.data.frame(cartOut$cptable)
+
+for (i in 2:nrow(cpDf)) {
+  if (cpDf$CP[i] < cpValue & cpDf$CP[i-1] > cpValue) {
+    xvalError <- cpDf$xerror[i]
+  }
+}
+
+cartCrossVal <- round((1-rootNE*xvalError)*100, digits=1)
+
+cat("Cross-validation percentage =", cartCrossVal, "\n")
+```
+
+Plot classification tree
+```{r}
+# Plot tree
+library(rpart.plot)
+
+rpart.plot(x = prune_cart, type = 0, extra=0, tweak = 1, box.palette = "white",roundint = FALSE)
+```
+
+
+Classification tree built on fuzzy clustering
+cp == complexity parameter
+rpart keeps track of something called the complexity of a tree. The complexity measure is a combination of the size of a tree and the ability of the tree to separate the classes of the target variable. If the next best split in growing a tree does not reduce the tree’s overall complexity by a certain amount, rpart will terminate the growing process.
+```{r}
+set.seed(84) # To remain consistent typically set this this to the same number always
+
+dataDf <- classed_hpk_fuzc#classed_hpk_wd
+groups <- sub_grp_fuzc
+
+cartAtts <- colnames(HPK_SM_metric) # insert list of attribute names
+
+cartFormula <- paste("sub_grp_fuzc", "~", paste(cartAtts, collapse = "+")) #change the sub_grp accordingly
+
+cartOut <- rpart(as.formula(cartFormula),
+                 data=dataDf, method="class", minsplit=3)
+
+# Plot figure to help choose appropriate number of branches
+plotcp(cartOut)
+```
+
+
+Continue ...
+```{r}
+# Enter value for appropriate number of branches
+cpValue <- 0.097#readline("CP value: ") (point below dash line)
+
+# Prune tree to appropriate number of branches
+prune_cart<-prune(cartOut, cpValue)
+
+# Evaluate misclassification rate
+pred_cart <- predict(prune_cart, dataDf, type=c("class"))
+
+misclass <- cbind(groups, pred_cart)
+
+perc_class <- nrow(misclass[misclass[,1]==misclass[,2],]) / 
+  length(misclass[,1]) * 100
+
+cat("Percent correctly classified =", perc_class, "\n")
+
+# Calculate cross-validation percentage
+rootNE <- cartOut$frame[1, 'dev']/cartOut$frame[1, 'n']
+
+cpDf <- as.data.frame(cartOut$cptable)
+
+for (i in 2:nrow(cpDf)) {
+  if (cpDf$CP[i] < cpValue & cpDf$CP[i-1] > cpValue) {
+    xvalError <- cpDf$xerror[i]
+  }
+}
+
+cartCrossVal <- round((1-rootNE*xvalError)*100, digits=1)
+
+cat("Cross-validation percentage =", cartCrossVal, "\n")
+```
+
+Plot classification tree
+```{r}
+# Plot tree
+library(rpart.plot)
+
+rpart.plot(x = prune_cart, type = 0, extra=0, tweak = 1, box.palette = "white",roundint = FALSE)
+```
+
+When rpart grows a tree it performs 10-fold cross validation on the data. Use printcp() to see the cross validation results.
+
+The rel error of each iteration of the tree is the fraction of mislabeled elements in the iteration relative to the fraction of mislabeled elements in the root.
+```{r}
+# Print cart performance statistics
+printcp(cartOut, digits = 3)
+```
+
+
+```{r}
+cartOut$variable.importance
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

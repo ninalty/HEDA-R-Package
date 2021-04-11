@@ -1,0 +1,37 @@
+colvec <- c("gray0", "gray0", "gray49", "gray49")
+
+wardsvec <- c(1, 2, 3, 4)
+
+plot(HPK_SM_metric_nmds2)
+with(classed_hpk2_wd,
+     points(HPK_SM_metric_nmds2,
+            display = "sites",
+            col = "black",
+            pch = wardsvec[sub_grp],
+            bg = colvec[sub_grp]))
+
+#Create convex hulls that highlight point clusters based on grouping dataframe
+ordihull(
+  HPK_SM_metric_nmds2,
+  classed_hpk2_wd$sub_grp,
+  display = "sites",
+  draw = c("polygon"),
+  col = NULL,
+  border = c("gray0", "gray0", "gray48", "gray48"),
+  lty = c(1, 2, 1, 2),
+  lwd = 2.5
+  )
+
+# Calculating and plotting centroids of NMDS Result
+scrs <-
+  scores(island.spp_NMS, display = "sites", "species")
+cent <-
+  aggregate(scrs ~ habitat, data = island.spp_groups, FUN = "mean")
+names(cent) [-1] <- colnames(scrs)
+points(cent [,-1],
+       pch = c( 8 , 8 , 8, 8),
+       col = c("gray0", "gray0", "gray48", "gray48"),
+       bg = c("black"),
+       lwd = 3.0,
+       cex = 2.0 # Plots centroids as points on ordination
+       )
