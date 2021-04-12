@@ -129,6 +129,16 @@ hpk_up_dw <- function(df){
   return(df)
 }
 
+# so I put the former four functions into one, please check 
+ReversalCount <- function(df){
+	df <- HPK_Count_Pre(df)
+	df <- Q_adj_bydift(df)
+	df <- add_tag.byYr(df)
+	df <- vector_angle(df)
+	df <- hpk_up_dw(df)
+	return(df)}
+
+
 ##------------------------------------------------------- Step 3 clean the noise ------------------------------------------------##
 ###------------------------------------------------ Step 3.1 clean the point (based on the position) ----------------------------------------##
 

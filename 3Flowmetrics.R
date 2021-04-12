@@ -1,11 +1,11 @@
 
-#--------------------Step 6 count the reversal
+#-----------------------------------------Step 6 count the reversal--------------------------------------------------
 library(dplyr)
 library(lubridate)
 library(zoo)
 
 # set working directory
-HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_CA/HPK_sm"
+HPK_Path <- "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_CA/HPK_sm/"
 
 site_list <- list.files(path = HPK_Path, "_ct.csv")#remove sites not needed
 
