@@ -1,0 +1,35 @@
+library("ggplot2")
+Reversal_Count_plot <- function(df){
+  tagpt_color <- c(NA, rgb(112,173,71, max=255), rgb(255,0,0, max=255), "black", rgb(46,117,182, max=255))
+  df$datetime2 <- paste(df$datetime, " ", df$nhour, ":00:00", sep = "")
+  df$datetime2 <- as.POSIXct(df$datetime2, format="%Y-%m-%d %H:%M:%S")
+  df$parameter_value <- df$parameter_value*0.028316847 # cfs to m3/s
+  ggplot()+geom_line(data = df, aes(x=datetime2, y=parameter_value), size=0.8, show.legend = FALSE) +
+    geom_point(data = df, aes(x=datetime2, y=parameter_value)) +
+    geom_point(data = df, aes(x=datetime2, y=parameter_value,
+                              shape=factor(dgtag, levels = c(0,2,3,4)),
+                              fill=factor(dgtag, levels = c(0,2,3,4)),
+                              color=factor(dgtag, levels = c(0,2,3,4))), na.rm = TRUE, size=4, show.legend = FALSE) +
+    scale_shape_manual(values = c(20,16, 16, 23))+
+    scale_color_manual(values = tagpt_color)+
+    scale_fill_manual(values = tagpt_color)+
+    scale_x_datetime(date_breaks = "3 days")+ # this allows user to plot date x axis
+    labs(x = "Time", title = df$location_id[1], color = "Type")+
+    ylab(expression(Discharge~(m^3/s))) +
+    theme(panel.background = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(colour = "black", fill=NA),
+          plot.title = element_text(size = 32),
+          axis.title.x = element_text(size = 30),
+          axis.title.y = element_text(size = 30),
+          axis.text.x = element_text(angle = 0, size = 29),
+          axis.text.y = element_text(size = 29))}
+
+#' @export
+HPK_plot <- function(filePath) {
+  plot_file <- read.table(filePath)
+  plot_file <- plot_file[2200:3200,]
+  sample_plot <- Reversal_Count_plot(plot_file)
+  ggsave(filename = paste(unique(plot_file$location_id),"_Reversal.png", sep = ""), plot = sample_plot, width = 40, height = 20, units = "cm")
+}
