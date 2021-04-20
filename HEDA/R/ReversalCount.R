@@ -61,12 +61,9 @@ Q_adj_bydift <- function(df){
 ##------------------------------------------- step 2.2  tag the data by time per year ----------------------------------------------##
 add_tag.byYr <- function(df){#this is included in the vector angle function)
   n = nrow(df)
-  #df$datetime <- as.POSIXct(strptime(df$datetime, "%Y-%m-%d %H:%M:%S"))
-  print(df$datetime)
   df$yr <- year(df$datetime)
   df$tag_yr <- rep(NA, nrow(df))
   unique_yr = unique(df$yr)
-  print(unique_yr)
   t=1
   l=1
 
@@ -86,9 +83,6 @@ add_tag.byYr <- function(df){#this is included in the vector angle function)
 
 ##-------------------------------------------step2.3 get the degree of vector -----------------------------------------------------##
 vector_angle <- function(df){# this is also included in the next function
-
-  #df <- add_tag.byYr(df)
-
   n = nrow(df)
   x = df$x
   y = df$dift_dis
@@ -106,7 +100,6 @@ vector_angle <- function(df){# this is also included in the next function
     }
   }
   df = cbind(df, degree) #  At the end of each year, I will have 2NA
-  # print("Vector Angle Done!")
   return(df)
 }
 
@@ -129,7 +122,6 @@ hpk_up_dw <- function(df, theta){
   return(df)
 }
 
-# so I put the former four functions into one, please check
 #' @export
 ReversalCount <- function(df, aerfa1, theta){
   df <- HPK_Count_Pre(df, aerfa1)

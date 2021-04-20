@@ -7,7 +7,7 @@ up_dw_ID <- function(df){
 
   df$up <- rep(NA, nrow(df))
   df$dw <- rep(NA, nrow(df))
-  index_lt <- which(df$dgtag %in% c(1,2,3,4))# check why these numbers
+  index_lt <- which(df$dgtag %in% c(1,2,3,4))
   n <- length(index_lt)-1
 
   tt <- 1
@@ -195,7 +195,6 @@ HPK_ramprt_duration <- function(df){
         df$Ramp_dw <- ifelse(df$Ramp_dw < 5, NA, df$Ramp_dw)
 
       }}}
-  #print("Done!")
   return(df)
 }
 
@@ -214,7 +213,7 @@ HPK_metrics <- function(filePath) {
     HPK_SM_updw_Daily <- up_dw_count(kk)
     HPK_SM_updw_Daily$location_id <- kk$location_id[1]
 
-    HPK_SM_updw_Daily$pkratio <- PK_Ratio(kk,HPK_SM_updw_Daily) # will get an error, it is fine
+    HPK_SM_updw_Daily$pkratio <- PK_Ratio(kk,HPK_SM_updw_Daily)
 
     #----------------------- Magnitude --------------------
     # to get the 95th of the peaking Q

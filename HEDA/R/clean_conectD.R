@@ -88,5 +88,4 @@ clean_conectD <- function(df, aerfa3, aerfa4){
         df$dgtag[x2] <- 0
         df$dgtag[x3] <- 0}}}
 
-  # print("ConnectD1 cleaned!")
   return(df)}

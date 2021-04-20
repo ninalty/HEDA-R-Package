@@ -19,7 +19,7 @@ clean_position <- function(df, aerfa2){
   #clean by the dynamic threshold
   index_lt <- which(df$dgtag %in% c(1,2,3,4))
 
-  n <- length(index_lt)-1#miss the last two reversal pt
+  n <- length(index_lt)-1
 
   a=1
   if (length(index_lt)>1) {
@@ -29,7 +29,6 @@ clean_position <- function(df, aerfa2){
 
       if(x1 > 24*a){
         a=a+1}
-      ###positioning
       #-- pt#1
       if(df$dgtag[x1]==1 & df$parameter_value[x1] > Q24.max[a]-Q24.delta[a]*aerfa2){#low pt shouldn't be too close to the high pt
         df$dgtag[x1] <- 0}
@@ -47,5 +46,4 @@ clean_position <- function(df, aerfa2){
       if(df$dgtag[x1]==2 & df$dgtag[x2]==4 & df$parameter_value[x1] > Q24.min[a]+Q24.delta[a]*aerfa2){#shouldn't be high
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0}}}
-  # print("Position Corrected!")
   return(df)}
