@@ -3,8 +3,7 @@ library(lubridate)
 library(zoo)
 
 
-HEDA_Tidy <- function(filePath, dirPathForSM, dirPathForWT) {
-  kk <- read.csv(filePath)
+HEDA_Tidy <- function(kk, dirPathForSM, dirPathForWT) {
   colnames(kk) <- c("location_id", "datetime","parameter_value")
   # Split data by seasons
   kk$datetime <- lubridate::mdy_hm(kk$datetime)
@@ -129,7 +128,7 @@ HEDA_Tidy <- function(filePath, dirPathForSM, dirPathForWT) {
 
 
     # keep one flow for one hour
-    kk <- kk %>% group_by(location_id,datetime) %>% distinct(parameter_value,ann_thre) %>% ungroup()
+    kk <- kk %>% group_by(location_id,datetime) %>% mutate(parameter_value = mean(parameter_value)) %>% distinct(parameter_value,ann_thre) %>% ungroup()
 
     #save that data in csv file
     write.table(kk, paste(dirPathForWT, kk$location_id[1],"_flow_wt.csv", sep = ""))

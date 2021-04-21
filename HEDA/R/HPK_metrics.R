@@ -200,8 +200,7 @@ HPK_ramprt_duration <- function(df){
 
 # ---------------------The exported function-----------------
 #' @export
-HPK_metrics <- function(filePath) {
-  kk = read.table(filePath)
+HPK_metrics <- function(kk) {
   kk <- kk %>% mutate(nhour = lubridate::hour(datetime)) %>% mutate(datetime = lubridate::date(datetime))
 
   #----------------------- Identify the up and dw process of hydropeaking
@@ -259,6 +258,6 @@ HPK_metrics <- function(filePath) {
     row.names(HPK_SM_metric) <- HPK_SM_metric[,1]
     HPK_SM_metric <- HPK_SM_metric[,-1]
 
-    write.csv(HPK_SM_metric,paste(HPK_Path, kk$location_id[1], "_metric.csv", sep = ""))
+    write.csv(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""))
   }
 }

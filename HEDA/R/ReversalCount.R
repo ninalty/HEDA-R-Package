@@ -13,12 +13,9 @@ theta = 60     # vector angle
 
 
 HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
-
+  x$datetime <- ymd_hms(x$datetime)
   ## replace the NA value of dift_dis with 0.
   x <- x %>% mutate(parameter_value = ifelse(is.na(parameter_value), 0, parameter_value))
-
-  # order the data by date
-  x <- x %>% arrange(datetime, .by_group = TRUE)
 
   # cut the head and foot to get rid of small fluctuations
   y <- x %>%
