@@ -1,7 +1,3 @@
-library(dplyr)
-library(lubridate)
-library(zoo)
-
 #Identify the up and dw
 up_dw_ID <- function(df){
 
@@ -200,7 +196,7 @@ HPK_ramprt_duration <- function(df){
 
 # ---------------------The exported function-----------------
 #' @export
-HPK_metrics <- function(kk) {
+HPK_metrics <- function(kk, dirPathForMetrics) {
   kk <- kk %>% mutate(nhour = lubridate::hour(datetime)) %>% mutate(datetime = lubridate::date(datetime))
 
   #----------------------- Identify the up and dw process of hydropeaking
@@ -260,4 +256,5 @@ HPK_metrics <- function(kk) {
 
     write.table(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""), sep=",")
   }
+  return(kk)
 }
