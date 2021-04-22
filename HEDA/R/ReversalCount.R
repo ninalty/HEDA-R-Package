@@ -4,15 +4,15 @@ library(lubridate)
 library(zoo)
 
 # coefficients used in thresholds
-aerfa1 = 0.03  #small fluctuations in predata process
-aerfa2 = 0.3  # position layer
-aerfa3 = 0.7   # T3 Local static Qave
-aerfa4 = 0.5  # T3 dynamic
+alpha1 = 0.03  #small fluctuations in predata process
+alpha2 = 0.3  # position layer
+alpha3 = 0.7   # T3 Local static Qave
+alpha4 = 0.5  # T3 dynamic
 theta = 60     # vector angle
 
 
 
-HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
+HPK_Count_Pre <- function(x, alpha1){ #X is dataframe
   # get the datetime a timeformat
   x$datetime <- ymd_hms(x$datetime)
   ## replace the NA value of dift_dis with 0.
@@ -35,7 +35,7 @@ HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
 
   ##### replace didft_dis < ann_thre*0.03, 0.03 was chosen based on the dataset.
   y <- y %>%
-    mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*aerfa1, 0, dift_dis)) %>%
+    mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*alpha1, 0, dift_dis)) %>%
     ungroup()
 
   return(y)
@@ -121,8 +121,8 @@ hpk_up_dw <- function(df, theta){
 }
 
 #' @export
-ReversalCount <- function(df, aerfa1, theta){
-  df <- HPK_Count_Pre(df, aerfa1)
+ReversalCount <- function(df, alpha1, theta){
+  df <- HPK_Count_Pre(df, alpha1)
   df <- Q_adj_bydift(df)
   df <- add_tag.byYr(df)
   df <- vector_angle(df)
