@@ -13,6 +13,7 @@ theta = 60     # vector angle
 
 
 HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
+  # get the datetime a timeformat
   x$datetime <- ymd_hms(x$datetime)
   ## replace the NA value of dift_dis with 0.
   x <- x %>% mutate(parameter_value = ifelse(is.na(parameter_value), 0, parameter_value))

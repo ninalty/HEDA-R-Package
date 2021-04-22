@@ -71,9 +71,9 @@ HEDA_Tidy <- function(kk, dirPathForSM, dirPathForWT) {
     }
 
     # keep one flow for one hour
-    kk <- kk %>% group_by(location_id,datetime) %>% distinct(parameter_value,ann_thre) %>% ungroup()
+    kk <- kk %>% group_by(location_id,datetime) %>% mutate(parameter_value = mean(parameter_value)) %>% distinct(parameter_value,ann_thre) %>% ungroup()
     #save that data in csv file
-    write.table(kk, paste(dirPathForSM, kk$location_id[1],"_flow_sm.csv", sep = ""))
+    write.table(kk, paste(dirPathForSM, kk$location_id[1],"_flow_sm.csv", sep = ""), sep=",")
 
     remove(kk,kk_,kkt,kkt_720,i)
   }
@@ -131,7 +131,7 @@ HEDA_Tidy <- function(kk, dirPathForSM, dirPathForWT) {
     kk <- kk %>% group_by(location_id,datetime) %>% mutate(parameter_value = mean(parameter_value)) %>% distinct(parameter_value,ann_thre) %>% ungroup()
 
     #save that data in csv file
-    write.table(kk, paste(dirPathForWT, kk$location_id[1],"_flow_wt.csv", sep = ""))
+    write.table(kk, paste(dirPathForWT, kk$location_id[1],"_flow_wt.csv", sep = ""), sep = ",")
 
     remove(kk,kk_,kkt,kkt_720,i)
   }

@@ -2,7 +2,8 @@ library("ggplot2")
 
 #' @export
 HPK_plot <- function(df){
-  tagpt_color <- c(NA, rgb(112,173,71, max=255), rgb(255,0,0, max=255), "black", rgb(46,117,182, max=255))
+  #tagpt_color <- c(NA, rgb(112,173,71, max=255), rgb(255,0,0, max=255), "black", rgb(46,117,182, max=255))
+  tagpt_color <- c("purple", rgb(112,173,71, max=255), rgb(255,0,0, max=255), "black", rgb(0,0,255, max=255))
 
   df$parameter_value <- df$parameter_value*0.028316847 # cfs to m3/s
 

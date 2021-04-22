@@ -258,6 +258,6 @@ HPK_metrics <- function(kk) {
     row.names(HPK_SM_metric) <- HPK_SM_metric[,1]
     HPK_SM_metric <- HPK_SM_metric[,-1]
 
-    write.csv(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""))
+    write.table(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""), sep=",")
   }
 }
