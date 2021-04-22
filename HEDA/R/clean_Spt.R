@@ -1,10 +1,10 @@
 #' @export
-clean_Spt <- function(df, aerfa3, aerfa4){
-  df <- clean_cotinpt(df, aerfa3, aerfa4)
-  df <- clean_conectS(df, aerfa3, aerfa4)
+clean_Spt <- function(df, alpha3 = 0.7, alpha4 = 0.5){
+  df <- clean_cotinpt(df, alpha3, alpha4)
+  df <- clean_conectS(df, alpha3, alpha4)
   return(df)}
 
-clean_cotinpt <- function(df, aerfa3, aerfa4){
+clean_cotinpt <- function(df, alpha3 = 0.7, alpha4 = 0.5){
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)
 
@@ -67,7 +67,7 @@ clean_cotinpt <- function(df, aerfa3, aerfa4){
         df$parameter_value[x1] <- max(df$parameter_value[x1], df$parameter_value[x3])
         df$parameter_value[x4] <- max(df$parameter_value[x1], df$parameter_value[x3])}
 
-      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==3 & df$dgtag[x4]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){# remove not far enough pairs
+      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==3 & df$dgtag[x4]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){# remove not far enough pairs
         if (df$parameter_value[x3] > df$parameter_value[x1]) {
           df$dgtag[x1] <- 0
           df$dgtag[x2] <- 0}
@@ -82,18 +82,18 @@ clean_cotinpt <- function(df, aerfa3, aerfa4){
         df$parameter_value[x1] <- min(df$parameter_value[x1], df$parameter_value[x3])
         df$parameter_value[x4] <- min(df$parameter_value[x1], df$parameter_value[x3])}
 
-      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==4 & df$dgtag[x4]==4 & df$parameter_value[x1]<df$parameter_value[x3] & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){#shred tends to be large
+      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==4 & df$dgtag[x4]==4 & df$parameter_value[x1]<df$parameter_value[x3] & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){#shred tends to be large
         df$dgtag[x3] <- 0
         df$dgtag[x4] <- 0}
 
-      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==4 & df$dgtag[x4]==4 & df$parameter_value[x1]>df$parameter_value[x3] & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){#shred tends to be large
+      if(df$dgtag[x1]==2 & df$dgtag[x3]==2 & df$dgtag[x2]==4 & df$dgtag[x4]==4 & df$parameter_value[x1]>df$parameter_value[x3] & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){#shred tends to be large
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0}}}
   # print("Continupts cleaned!")
   return(df)}
 
 
-clean_conectS <- function(df, aerfa3, aerfa4){
+clean_conectS <- function(df, alpha3, alpha4){
 
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)
@@ -137,14 +137,14 @@ clean_conectS <- function(df, aerfa3, aerfa4){
         df$parameter_value[x1] <- df$parameter_value[x2]
         df$dgtag[x2] <- 0}
 
-      if(df$dgtag[x2]==2 & df$dgtag[x3]==4 & df$dgtag[x1]==1 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){
+      if(df$dgtag[x2]==2 & df$dgtag[x3]==4 & df$dgtag[x1]==1 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){
         if(df$parameter_value[x1] < df$parameter_value[x2]) {
           df$dgtag[x2] <- 0
           df$dgtag[x3] <- 0}
         if(df$parameter_value[x1] >= df$parameter_value[x2]) {
           df$dgtag[x1] <- 0}}
 
-      if(df$dgtag[x2]==2 & df$dgtag[x3]==4 & df$dgtag[x4]==1 & abs(df$parameter_value[x2]-df$parameter_value[x4])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){
+      if(df$dgtag[x2]==2 & df$dgtag[x3]==4 & df$dgtag[x4]==1 & abs(df$parameter_value[x2]-df$parameter_value[x4])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){
         if(df$parameter_value[x4] < df$parameter_value[x2]) {
           df$dgtag[x2] <- 0
           df$dgtag[x3] <- 0}
@@ -163,7 +163,7 @@ clean_conectS <- function(df, aerfa3, aerfa4){
         df$dgtag[x2] <- 0}
 
       #pt#3 --> 2&3 pair
-      if(df$dgtag[x1]!=2 & df$dgtag[x2]==3 & df$dgtag[x3]==2 & df$dgtag[x4]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){
+      if(df$dgtag[x1]!=2 & df$dgtag[x2]==3 & df$dgtag[x3]==2 & df$dgtag[x4]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){
 
         if (df$parameter_value[x2] <= df$parameter_value[x3]){
           df$dgtag[x2] <- 0}
@@ -172,7 +172,7 @@ clean_conectS <- function(df, aerfa3, aerfa4){
           df$dgtag[x4] <- 0}}
 
       #pt2&3 pair --> pt#3
-      if(df$dgtag[x1]==2 & df$dgtag[x2]==3 & df$dgtag[x3]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3)){
+      if(df$dgtag[x1]==2 & df$dgtag[x2]==3 & df$dgtag[x3]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3])<max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3)){
         if (df$parameter_value[x1] < df$parameter_value[x3]) {
           df$dgtag[x1] <- 0
           df$dgtag[x2] <- 0}

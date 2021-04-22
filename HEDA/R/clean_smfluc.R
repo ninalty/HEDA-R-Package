@@ -85,5 +85,4 @@ clean_smfluc <- function(df){
           df$dgtag[x2] <- 0
           df$dgtag[x3] <- 0}}}}
 
-  # print("Fluctuation cleaned!")
   return(df)}

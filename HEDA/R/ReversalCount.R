@@ -4,21 +4,19 @@ library(lubridate)
 library(zoo)
 
 # coefficients used in thresholds
-aerfa1 = 0.03  #small fluctuations in predata process
-aerfa2 = 0.3  # position layer
-aerfa3 = 0.7   # T3 Local static Qave
-aerfa4 = 0.5  # T3 dynamic
+alpha1 = 0.03  #small fluctuations in predata process
+alpha2 = 0.3  # position layer
+alpha3 = 0.7   # T3 Local static Qave
+alpha4 = 0.5  # T3 dynamic
 theta = 60     # vector angle
 
 
 
-HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
-
+HPK_Count_Pre <- function(x, alpha1 = 0.03){ #X is dataframe
+  # get the datetime a timeformat
+  x$datetime <- ymd_hms(x$datetime)
   ## replace the NA value of dift_dis with 0.
   x <- x %>% mutate(parameter_value = ifelse(is.na(parameter_value), 0, parameter_value))
-
-  # order the data by date
-  x <- x %>% arrange(datetime, .by_group = TRUE)
 
   # cut the head and foot to get rid of small fluctuations
   y <- x %>%
@@ -37,7 +35,7 @@ HPK_Count_Pre <- function(x, aerfa1){ #X is dataframe
 
   ##### replace didft_dis < ann_thre*0.03, 0.03 was chosen based on the dataset.
   y <- y %>%
-    mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*aerfa1, 0, dift_dis)) %>%
+    mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*alpha1, 0, dift_dis)) %>%
     ungroup()
 
   return(y)
@@ -61,12 +59,9 @@ Q_adj_bydift <- function(df){
 ##------------------------------------------- step 2.2  tag the data by time per year ----------------------------------------------##
 add_tag.byYr <- function(df){#this is included in the vector angle function)
   n = nrow(df)
-  #df$datetime <- as.POSIXct(strptime(df$datetime, "%Y-%m-%d %H:%M:%S"))
-  print(df$datetime)
   df$yr <- year(df$datetime)
   df$tag_yr <- rep(NA, nrow(df))
   unique_yr = unique(df$yr)
-  print(unique_yr)
   t=1
   l=1
 
@@ -86,9 +81,6 @@ add_tag.byYr <- function(df){#this is included in the vector angle function)
 
 ##-------------------------------------------step2.3 get the degree of vector -----------------------------------------------------##
 vector_angle <- function(df){# this is also included in the next function
-
-  #df <- add_tag.byYr(df)
-
   n = nrow(df)
   x = df$x
   y = df$dift_dis
@@ -106,13 +98,12 @@ vector_angle <- function(df){# this is also included in the next function
     }
   }
   df = cbind(df, degree) #  At the end of each year, I will have 2NA
-  # print("Vector Angle Done!")
   return(df)
 }
 
 ##-------------------------------------step2.4 divide pks into up and down process ---------------------------------------------##
 # this one includes the above 2 functions
-hpk_up_dw <- function(df, theta){
+hpk_up_dw <- function(df, theta = 60){
 
   n = nrow(df)
 
@@ -129,10 +120,9 @@ hpk_up_dw <- function(df, theta){
   return(df)
 }
 
-# so I put the former four functions into one, please check
 #' @export
-ReversalCount <- function(df, aerfa1, theta){
-  df <- HPK_Count_Pre(df, aerfa1)
+ReversalCount <- function(df, alpha1 = 0.03, theta = 60){
+  df <- HPK_Count_Pre(df, alpha1)
   df <- Q_adj_bydift(df)
   df <- add_tag.byYr(df)
   df <- vector_angle(df)
