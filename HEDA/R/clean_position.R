@@ -1,5 +1,5 @@
 #' @export
-clean_position <- function(df, aerfa2){
+clean_position <- function(df, alpha2 = 0.3){
 
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)
@@ -30,20 +30,20 @@ clean_position <- function(df, aerfa2){
       if(x1 > 24*a){
         a=a+1}
       #-- pt#1
-      if(df$dgtag[x1]==1 & df$parameter_value[x1] > Q24.max[a]-Q24.delta[a]*aerfa2){#low pt shouldn't be too close to the high pt
+      if(df$dgtag[x1]==1 & df$parameter_value[x1] > Q24.max[a]-Q24.delta[a]*alpha2){#low pt shouldn't be too close to the high pt
         df$dgtag[x1] <- 0}
 
       #--pt3
-      if(df$dgtag[x2]==3 & df$dgtag[x1]!=2 & df$parameter_value[x2] < Q24.min[a]+Q24.delta[a]*aerfa2){#high pt shouldn't be close to low pt
+      if(df$dgtag[x2]==3 & df$dgtag[x1]!=2 & df$parameter_value[x2] < Q24.min[a]+Q24.delta[a]*alpha2){#high pt shouldn't be close to low pt
         df$dgtag[x2] <- 0}
 
       #--pt23
-      if(df$dgtag[x1]==2 & df$dgtag[x2]==3 & df$parameter_value[x1] < Q24.max[a]-Q24.delta[a]*aerfa2){#shouldn't be low
+      if(df$dgtag[x1]==2 & df$dgtag[x2]==3 & df$parameter_value[x1] < Q24.max[a]-Q24.delta[a]*alpha2){#shouldn't be low
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0}
 
       #--pt24
-      if(df$dgtag[x1]==2 & df$dgtag[x2]==4 & df$parameter_value[x1] > Q24.min[a]+Q24.delta[a]*aerfa2){#shouldn't be high
+      if(df$dgtag[x1]==2 & df$dgtag[x2]==4 & df$parameter_value[x1] > Q24.min[a]+Q24.delta[a]*alpha2){#shouldn't be high
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0}}}
   return(df)}

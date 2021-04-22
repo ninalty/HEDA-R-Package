@@ -12,7 +12,7 @@ theta = 60     # vector angle
 
 
 
-HPK_Count_Pre <- function(x, alpha1){ #X is dataframe
+HPK_Count_Pre <- function(x, alpha1 = 0.03){ #X is dataframe
   # get the datetime a timeformat
   x$datetime <- ymd_hms(x$datetime)
   ## replace the NA value of dift_dis with 0.
@@ -103,7 +103,7 @@ vector_angle <- function(df){# this is also included in the next function
 
 ##-------------------------------------step2.4 divide pks into up and down process ---------------------------------------------##
 # this one includes the above 2 functions
-hpk_up_dw <- function(df, theta){
+hpk_up_dw <- function(df, theta = 60){
 
   n = nrow(df)
 
@@ -121,7 +121,7 @@ hpk_up_dw <- function(df, theta){
 }
 
 #' @export
-ReversalCount <- function(df, alpha1, theta){
+ReversalCount <- function(df, alpha1 = 0.03, theta = 60){
   df <- HPK_Count_Pre(df, alpha1)
   df <- Q_adj_bydift(df)
   df <- add_tag.byYr(df)

@@ -1,5 +1,5 @@
 #' @export
-clean_conectD <- function(df, aerfa3, aerfa4){
+clean_conectD <- function(df, alpha3 = 0.7, alpha4 = 0.5){
 
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)
@@ -33,40 +33,40 @@ clean_conectD <- function(df, aerfa3, aerfa4){
         a=a+1}
 
       #pt#1 -- pt#23
-      if(df$dgtag[x1] ==1 & df$dgtag[x2]==2 & df$dgtag[x3]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] ==1 & df$dgtag[x2]==2 & df$dgtag[x3]==3 & abs(df$parameter_value[x1]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x3]<0.9*Q24.max[a] & df$parameter_value[x1]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0
         df$dgtag[x3] <- 0}
 
       #pt#1 -- pt#3
-      if(df$dgtag[x1] ==1 & df$dgtag[x2]==3 & abs(df$parameter_value[x1]-df$parameter_value[x2]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] ==1 & df$dgtag[x2]==3 & abs(df$parameter_value[x1]-df$parameter_value[x2]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x2]<0.9*Q24.max[a] & df$parameter_value[x1]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0}
 
       #pt#3 --pt#1
-      if(df$dgtag[x1] !=2  & df$dgtag[x2]==3 & df$dgtag[x3]==1 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] !=2  & df$dgtag[x2]==3 & df$dgtag[x3]==1 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x2]<0.9*Q24.max[a] & df$parameter_value[x3]>1.1*Q24.min[a]){
         df$dgtag[x2] <- 0
         df$dgtag[x3] <- 0}
 
       #pt#3 -- pt24
-      if(df$dgtag[x1]!=2 & df$dgtag[x2] ==3 & df$dgtag[x3]==2 & df$dgtag[x4]==4 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1]!=2 & df$dgtag[x2] ==3 & df$dgtag[x3]==2 & df$dgtag[x4]==4 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x2]<0.9*Q24.max[a] & df$parameter_value[x3]>1.1*Q24.min[a]){
         df$dgtag[x2] <- 0
         df$dgtag[x3] <- 0
         df$dgtag[x4] <- 0}
 
       #pt23---pt#1
-      if(df$dgtag[x1] ==2 & df$dgtag[x2]==3 & df$dgtag[x3]==1 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] ==2 & df$dgtag[x2]==3 & df$dgtag[x3]==1 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x2]<0.9*Q24.max[a] & df$parameter_value[x3]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0
         df$dgtag[x3] <- 0}
 
       #pt23--pt24
-      if(df$dgtag[x1] ==2 & df$dgtag[x2]==3 & df$dgtag[x3]==2 & df$dgtag[x4]==4 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] ==2 & df$dgtag[x2]==3 & df$dgtag[x3]==2 & df$dgtag[x4]==4 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x2]<0.9*Q24.max[a] & df$parameter_value[x3]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0
@@ -74,7 +74,7 @@ clean_conectD <- function(df, aerfa3, aerfa4){
         df$dgtag[x4] <- 0}
 
       #pt24--pt23
-      if(df$dgtag[x1] ==2 & df$dgtag[x2]==4 & df$dgtag[x3]==2 & df$dgtag[x4]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1] ==2 & df$dgtag[x2]==4 & df$dgtag[x3]==2 & df$dgtag[x4]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x3]<0.9*Q24.max[a] & df$parameter_value[x2]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0
@@ -82,7 +82,7 @@ clean_conectD <- function(df, aerfa3, aerfa4){
         df$dgtag[x4] <- 0}
 
       #pt24--pt#3
-      if(df$dgtag[x1]==2 & df$dgtag[x2] ==4 & df$dgtag[x3]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*aerfa4,df$ann_thre[1]*aerfa3) &
+      if(df$dgtag[x1]==2 & df$dgtag[x2] ==4 & df$dgtag[x3]==3 & abs(df$parameter_value[x2]-df$parameter_value[x3]) < max(Q24.delta[a]*alpha4,df$ann_thre[1]*alpha3) &
          df$parameter_value[x3]<0.9*Q24.max[a] & df$parameter_value[x1]>1.1*Q24.min[a]){
         df$dgtag[x1] <- 0
         df$dgtag[x2] <- 0
