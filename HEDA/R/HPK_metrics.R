@@ -256,5 +256,5 @@ HPK_metrics <- function(kk, dirPathForMetrics) {
 
     write.table(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""), sep=",")
   }
-  return(kk)
+  return(HPK_SM_metric)
 }
