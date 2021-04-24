@@ -1,0 +1,258 @@
+<center><h1>"HEDA" Package</h1></center>
+
+***
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<strong>Type</strong>			Package
+
+<strong>Title</strong>    **H**ydropeaking **E**vents **D**etection **A**lgorithm
+
+<strong>Version</strong> 1.0
+
+<strong>Author</strong> Tingyu Li(styli@ucdavis.edu), Xiaotian Zou(xtzou@ucdavis.edu), Gregory B. Pasternack(gpast@ucdavis.edu)
+
+<strong>Maintainer</strong> Tingyu Li(styli@ucdavis.edu)
+
+<strong>Description</strong>
+
+<strong>License</strong>
+
+<strong>Encoding</strong> UTF-8
+
+<strong>LazyData</strong> true
+
+<strong>RoxygenNote</strong>
+
+<strong>NeedsCompliation</strong> no
+
+<strong>Repository</strong> CRAN
+
+<strong>Date/Publication</strong> 2021-04-21
+
+***
+
+## User Guide
+1. Prior to using this library, users are required to import these packages: <strong>dplyr</strong>, <strong>lubridate</strong>, <strong>zoo</strong>, <strong>ggplot2</strong>.
+2. The input files should be .csv files, and are required to only contain 3 columns, which are site id, date time and parameter value respectively.
+
+***
+
+## Functions
+```
+HEDA_Tidy        Preprocess the data
+```
+<strong>Description</strong>
+
+&emsp;Format flow record into hourly record; Split record into dry and wet season data; interpolate and smoothing the record.  
+
+<strong>Usage</strong>
+
+&emsp;<span style= "font-family:Verdana">HEDA_Tidy(dataframe, dirPathForSM, dirPathForWT)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana"> dataframe </span> &emsp;&emsp;&emsp; Name of the dataframe to be processed. </br>
+&emsp; <span style= "font-family:Verdana">dirPathForSM </span> &emsp; The directory path where dry season data will be saved.</br>
+&emsp; <span style= "font-family:Verdana">dirPathForWT </span> &emsp; The directory path where wet season data will be saved.</br>
+
+<strong>Outputs</strong>
+
+&emsp; Output files are generated in the designated directories, with 4 columns containing location id, datatime, parameter value, ann_thre.
+
+<strong>Example</strong>
+
+``` {r eval=FALSE}
+df = read.csv(filePath)
+HEDA_Tidy(df, dirPathForSM, dirPathForWt)
+
+```
+***
+
+```
+ReversalCount        Detect hydropeaking events
+```
+<strong>Description</strong>
+
+&emsp; Detect change points of hydropeaking events and classified change points into four categories.
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">ReversalCount(dataframe, alpha1, theta)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; Name of the dataframe to be processed. </br>
+&emsp; <span style= "font-family:Verdana">alpha1</span> &emsp;&emsp;&emsp; Default value : 0.03 </br> 
+&emsp; <span style= "font-family:Verdana">theta</span> &emsp;&emsp;&emsp;&emsp; Default value : 60
+
+<strong>Outputs</strong>
+
+&emsp; The output csv file will be saved into the directory path specified by dirPathForCt.
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+alpha1 <- 0.03
+theta <- 60
+df <- read.table(filePath, sep = ",")
+ReversalCount(df, alpha1, theta)
+
+```
+
+***
+
+```
+clean_position        Exclude change points in wrong position
+```
+
+<strong>Description</strong>
+
+&emsp; Change points are excluded if they are in the wrong position. For example, both point 3 and the peak pair represent the peaking discharge whose value (position) should be close to the daily maximum discharge. If the peaking discharge is close to the daily minimum discharge, change points will be removed since they are in the wrong positions.
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">clean_position(dataframe, alpha2)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe </span>&emsp;  Name of the dataframe to be processed.</br>
+&emsp; <span style= "font-family:Verdana">alpha2 </span>&emsp;&emsp;&emsp; Default value : 0.3. </br>
+
+<strong>Outputs</strong>
+
+&emsp; The output is dataframe.
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+alpha2 <- 0.3
+df <- clean_position(df, alpha2)
+
+```
+***
+
+
+```
+clean_Spt        Clean repeated points
+```
+
+<strong>Description</strong>
+
+&emsp; Clean continuous points of the same type
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">clean_Spt(dataframe, alpha3, alpha4) </span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; Name of the dataframe to be processed. </br>
+&emsp; <span style= "font-family:Verdana">alpha3</span> &emsp;&emsp;&emsp; The default value: 0.7</br>
+&emsp; <span style= "font-family:Verdana">alpha4</span> &emsp;&emsp;&emsp; The default value: 0.5</br>
+
+<strong>Outputs</strong>
+
+&emsp; The output file is dataframe.
+
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+alpha3 <- 0.7
+alpha4 <- 0.5
+df <- clean_Spt(df, alpha3, alpha4)
+```
+
+***
+
+```
+clean_conectD        Evaluate difference between peaking and off-peaking discharge
+```
+
+<strong>Description</strong>
+
+&emsp; Evaluate whether the difference in discharge between peaking and off-peaking points is qualified to be identified as hydropeaking events.
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">clean_conectD(dataframe, alpha3, alpha4)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; Name of the input dataframe to be processed. </br>
+&emsp; <span style= "font-family:Verdana">alpha3</span> &emsp;&emsp;&emsp; The default value: 0.7. </br>
+&emsp; <span style= "font-family:Verdana">alpha4</span> &emsp;&emsp;&emsp; The default value: 0.5. </br>
+
+<strong>Outputs</strong>
+
+&emsp; The output will be a dataframe in the same form with the input.
+
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+alpha3 <- 0.7
+alpha4 <- 0.5
+df <- clean_conectD(df, alpha3, alpha4)
+```
+***
+
+```
+HPK_plot        Plot hydrograph
+```
+
+<strong>Description</strong>
+
+&emsp; Plot the hydrograph of the processed data with change points marked by different colors.
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">HPK_plot(dataframe)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; Name of the input dataframe to be processed.
+
+<strong>Outputs</strong>
+
+&emsp; The plot will be presented under the "Plots" tab in RStudio. Users can determine whether to save out the diagram by themselves.
+
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+HPK_plot(df)
+```
+***
+
+```
+HPK_metrics        Extract metrics
+```
+
+<strong>Description</strong>
+
+&emsp; Extract 15 metrics from the identified hydropeaking events. 
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">HPK_metrics(dataframe, dirPathForMetrics)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; &emsp;&emsp;&emsp;&emsp;Name of the dataframe to be processed. </br>
+&emsp; <span style= "font-family:Verdana">dirPathForMetrics</span>&emsp; Folder path where the result will be stored.
+
+<strong>Outputs</strong>
+
+&emsp; It is stored as a csv file in the working path specified by the user. Because the length of each metric is different, the median value of each metric is set to be the output. However, time-series value of metrics is produced. 
+
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+dirPathForMetrics <- ".../.../.../"
+HPK_metrics(df, dirPathForMetrics)
+```
