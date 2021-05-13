@@ -196,8 +196,9 @@ HPK_ramprt_duration <- function(df){
 
 # ---------------------The exported function-----------------
 #' @export
-HPK_metrics <- function(kk, dirPathForMetrics) {
-  kk <- kk %>% mutate(nhour = lubridate::hour(datetime)) %>% mutate(datetime = lubridate::date(datetime))
+HPK_metrics <- function(kk) {
+
+  kk <- kk %>% mutate(nhour = hour(datetime)) %>% mutate(datetime = as.Date(datetime))
 
   #----------------------- Identify the up and dw process of hydropeaking
   kk <- up_dw_ID(kk)
@@ -250,11 +251,13 @@ HPK_metrics <- function(kk, dirPathForMetrics) {
 
     #-----------------------  Make the metrics  ------------------------
     HPK_SM_metric <- data.frame(kk$location_id[1], Pk_No, Qpeak, Qoff_peak, Pk_retention, Offpk_Retention, Ramp_dw, Ramp_up, D_rampdw, D_rampup, Strange_dw, Strange_up, pk_ratio, Tmax, RB_Index_dw,RB_Index_up)
-
-    row.names(HPK_SM_metric) <- HPK_SM_metric[,1]
-    HPK_SM_metric <- HPK_SM_metric[,-1]
-
-    write.table(HPK_SM_metric,paste(dirPathForMetrics, kk$location_id[1], "_metric.csv", sep = ""), sep=",")
+	col_name <- c("location_id","Pk_No", "Qpeak", "Qoff_peak", "Pk_retention", "Offpk_Retention", "Ramp_dw", "Ramp_up", "D_rampdw", "D_rampup", "Strange_dw", "Strange_up", "pk_ratio", "Tmax", "RB_Index_dw","RB_Index_up")
+	colnames(HPK_SM_metric) <- col_name
   }
+  
+  else {
+  HPK_SM_metric <- data.frame(kk$location_id[1], Pk_No = NA, Qpeak = NA, Qoff_peak = NA, Pk_retention = NA, Offpk_Retention = NA, Ramp_dw = NA, Ramp_up = NA, D_rampdw = NA, D_rampup = NA, Strange_dw = NA, Strange_up = NA, pk_ratio = NA, Tmax = NA, RB_Index_dw = NA,RB_Index_up = NA)
+  colnames(HPK_SM_metric) <- col_name
+}
   return(HPK_SM_metric)
 }

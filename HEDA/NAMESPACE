@@ -6,4 +6,4 @@ export(clean_Spt)
 export(clean_conectD)
 export(HPK_metrics)
 export(HPK_plot)
-export(clean_smfluc)
+
