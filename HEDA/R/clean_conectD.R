@@ -1,5 +1,5 @@
 #' @export
-clean_conectD <- function(df, alpha3 = 0.7, alpha4 = 0.5){
+Clean_conectD <- function(df, alpha3 = 0.7, alpha4 = 0.5){
 
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)

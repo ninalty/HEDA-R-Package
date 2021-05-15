@@ -10,42 +10,45 @@ df1 <- read.table("D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_WC/CA/11278400.c
 filepath = "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HEDA_Sampledata/"
 
 
-#----------------- clean and interpolate
+# clean and interpolate
+## format the time column to time format
+df1$dateTime <- parse_date_time(df1$dateTime, "mdy HM")
+
+# clean subset data by season
 hpk_flow_sm_cln = HEDA_Tidy(df1, season = c(6,7,8,9))
 
-#save that data in csv file, recommended
-# write.table(hpk_flow_sm_cln, paste(filepath, hpk_flow_sm_cln$location_id[1],"_flow_sm.csv", sep = ""), sep=",", row.names = FALSE)
 
-
-#######################################      Hyddropeaking events detection        ########################
-
-# 60 is for metric units, corrresponding to a rate of change of 1.7m3/s.
+# Hyddropeaking events detection
+## identify hydropeaking events
+### 60 is for metric units, corrresponding to a rate of change of 1.7m3/s.
 hpk_flow_cg <- ReversalCount(hpk_flow_sm_cln, alpha1 = 0.03, theta = 85)
 
 
 
-#######################################       Clean noise       ########################
-hpk_flow_cg <- clean_position(hpk_flow_cg, alpha2 = 0.3)
+# Clean noise
+hpk_flow_cg <- Clean_position(hpk_flow_cg, alpha2 = 0.3)
 
-# clean_Spt and clean_conectD are suggested to repeat twice. The performance can be checked with HPK_plot()
-hpk_flow_cg <- clean_Spt(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
+# Clean_Spt and Clean_conectD are suggested to repeat twice. The performance can be checked with HPK_plot()
+hpk_flow_cg <- Clean_Spt(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
 
-hpk_flow_cg <- clean_Spt(hpk_flow_cg)
+hpk_flow_cg <- Clean_Spt(hpk_flow_cg)
 
-hpk_flow_cg <- clean_conectD(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
+hpk_flow_cg <- Clean_conectD(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
 
-hpk_flow_cg <- clean_Spt(hpk_flow_cg)
+hpk_flow_cg <- Clean_Spt(hpk_flow_cg)
 
 
-#######################################           Visualization        #############################
-# subset the data
+# Visualization
+## subset the data
 tt = hpk_flow_cg[13100:13600,]
 
 # plot the hydrograph of the subset data
 HPK_plot(tt)
 
 
-####################################            Extract metrics            ###############
-hpk_flow_metric <- HPK_metrics(hpk_flow_cg)
+# Extract metrics
+HpkFrqMgt <- HPK_frq_mgt(hpk_flow_cg)
+HpkRtDur <- HPK_rt_dur(hpk_flow_cg)
 
-write.table(hpk_flow_metric,paste(filepath, hpk_flow_metric$location_id[1], "_metric_sm.csv", sep = ""), sep=",", row.names = FALSE)
+# to extract time series metric
+pk_no <- HpkFrqMgt[na.omit(HpkFrqMgt$pk_no),c("location_id", "datetime","pk_no")]

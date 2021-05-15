@@ -1,5 +1,5 @@
 #' @export
-clean_position <- function(df, alpha2 = 0.3){
+Clean_position <- function(df, alpha2 = 0.3){
 
   ## get the dynamic threshold
   Q24.max <- rollapply(df$parameter_value, 24, max, align="right", by=24)

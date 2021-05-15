@@ -1,25 +1,24 @@
 
 HEDA_Tidy <- function(kk, season) {
   colnames(kk) <- c("location_id", "datetime","parameter_value")
-  kk$datetime <- mdy_hm(kk$datetime)
+
   kk$mth <- month(kk$datetime)
   kk$yr <- year(kk$datetime)
   kk$dy <- day(kk$datetime)
   kk$nhr <- hour(kk$datetime)
-  
+
+  # format the datetime
+  kk$datetime <- paste(kk$yr, kk$mth, kk$dy, sep = "-")
+
+  kk$datetime <- paste(kk$datetime, " ",kk$nhr, ":00:00", sep = "")
 
   # get rid of negative value
   kk$parameter_value <- ifelse(kk$parameter_value < 0, 0, kk$parameter_value)
 
   # get annual threshold
   kk$ann_thre <- mean(kk$parameter_value, na.rm = TRUE)
-  
-    
-  # format the datetime
-  kk$datetime <- paste(kk$yr, kk$mth, kk$dy, sep = "-")
 
-  kk$datetime <- paste(kk$datetime, " ",kk$nhr, ":00:00", sep = "")
-  
+
   kk <- kk[kk$mth %in% season,]
 
 

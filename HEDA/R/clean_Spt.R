@@ -1,5 +1,5 @@
 #' @export
-clean_Spt <- function(df, alpha3 = 0.7, alpha4 = 0.5){
+Clean_Spt <- function(df, alpha3 = 0.7, alpha4 = 0.5){
   df <- clean_cotinpt(df, alpha3, alpha4)
   df <- clean_conectS(df, alpha3, alpha4)
   return(df)}

@@ -20,10 +20,10 @@ HPK_Count_Pre <- function(x, alpha1 = 0.03){ #X is dataframe
 
   # cut the head and foot to get rid of small fluctuations
   y <- x %>%
-    mutate(flow_80th = quantile(parameter_value, probs = 0.9)) %>%
-    mutate(flow_20th = quantile(parameter_value, probs = 0.1)) %>%
-    mutate(parameter_value = ifelse(parameter_value < flow_80th, parameter_value, flow_80th)) %>%
-    mutate(parameter_value = ifelse(parameter_value > flow_20th, parameter_value, flow_20th)) %>%
+    mutate(flow_90th = quantile(parameter_value, probs = 0.9)) %>%
+    mutate(flow_10th = quantile(parameter_value, probs = 0.1)) %>%
+    mutate(parameter_value = ifelse(parameter_value < flow_90th, parameter_value, flow_90th)) %>%
+    mutate(parameter_value = ifelse(parameter_value > flow_10th, parameter_value, flow_10th)) %>%
     mutate(dift_dis = lead(parameter_value,1)-parameter_value) %>%
     ungroup()
 
