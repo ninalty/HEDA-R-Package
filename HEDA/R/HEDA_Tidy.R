@@ -1,36 +1,36 @@
 
-HEDA_Tidy <- function(kk, season) {
-  colnames(kk) <- c("location_id", "datetime","parameter_value")
+HEDA_Tidy <- function(df, season) {
+  colnames(df) <- c("location_id", "datetime","parameter_value")
 
-  kk$mth <- month(kk$datetime)
-  kk$yr <- year(kk$datetime)
-  kk$dy <- day(kk$datetime)
-  kk$nhr <- hour(kk$datetime)
+  df$mth <- month(df$datetime)
+  df$yr <- year(df$datetime)
+  df$dy <- day(df$datetime)
+  df$nhr <- hour(df$datetime)
 
   # format the datetime
-  kk$datetime <- paste(kk$yr, kk$mth, kk$dy, sep = "-")
+  df$datetime <- paste(df$yr, df$mth, df$dy, sep = "-")
 
-  kk$datetime <- paste(kk$datetime, " ",kk$nhr, ":00:00", sep = "")
+  df$datetime <- paste(df$datetime, " ",df$nhr, ":00:00", sep = "")
 
   # get rid of negative value
-  kk$parameter_value <- ifelse(kk$parameter_value < 0, 0, kk$parameter_value)
+  df$parameter_value <- ifelse(df$parameter_value < 0, 0, df$parameter_value)
 
   # get annual threshold
-  kk$ann_thre <- mean(kk$parameter_value, na.rm = TRUE)
+  df$ann_thre <- mean(df$parameter_value, na.rm = TRUE)
 
 
-  kk <- kk[kk$mth %in% season,]
+  df <- df[df$mth %in% season,]
 
 
   # check whether data is empty or not
-  if (nrow(kk)>10) {
+  if (nrow(df)>10) {
 
     # Interpolation data
 
     ########################################### deal with NA data ######################################################
 
     ## Get out all the data that have NA
-    kk_ <- kk[is.na(kk$parameter_value),]
+    kk_ <- df[is.na(df$parameter_value),]
 
     ## Count how many NA occurs per year per location_id
     kkt <- kk_ %>% group_by(yr, mth) %>% count()
@@ -39,7 +39,7 @@ HEDA_Tidy <- function(kk, season) {
     kkt_720 <- kkt %>% filter(n >= 720)
 
     # remove these record
-    kk <- anti_join(kk,kkt_720, by=c("yr", "mth"))
+    kk <- anti_join(df,kkt_720, by=c("yr", "mth"))
 
     #################################################### Interpolation ####################################################################
 
