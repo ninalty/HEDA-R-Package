@@ -4,25 +4,21 @@ library(zoo)
 library(lubridate)
 
 # import the flow data
-df1 <- read.table("D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_WC/CA/11278400.csv",sep = ",",header = TRUE, row.names = NULL)
-
-# set the output file path for HEDA_Tidy()
-filepath = "D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HEDA_Sampledata/"
+df <- HPK_Sample_data
 
 
 # clean and interpolate
 ## format the time column to time format
-df1$dateTime <- parse_date_time(df1$dateTime, "mdy HM")
+df1$dateTime <- parse_date_time(df$dateTime, "mdy HM")
 
 # clean subset data by season
-hpk_flow_sm_cln = HEDA_Tidy(df1, season = c(6,7,8,9))
+hpk_flow_sm_cln = HEDA_Tidy(df, season = c(6,7,8,9))
 
 
 # Hyddropeaking events detection
 ## identify hydropeaking events
 ### 60 is for metric units, corrresponding to a rate of change of 1.7m3/s.
-hpk_flow_cg <- ReversalCount(hpk_flow_sm_cln, alpha1 = 0.03, theta = 85)
-
+hpk_flow_cg <- ReversalCount(hpk_flow_cln, alpha1 = 0.03, theta = 85)
 
 
 # Clean noise
@@ -49,6 +45,7 @@ HPK_plot(tt)
 # Extract metrics
 HpkFrqMgt <- HPK_frq_mgt(hpk_flow_cg)
 HpkRtDur <- HPK_rt_dur(hpk_flow_cg)
+
 
 # to extract time series metric
 pk_no <- HpkFrqMgt[na.omit(HpkFrqMgt$pk_no),c("location_id", "datetime","pk_no")]
