@@ -1,3 +1,8 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 <center><h1>"HEDA" Package</h1></center>
 
 ***
@@ -12,11 +17,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <strong>Version</strong> 1.0
 
-<strong>Author</strong> Tingyu Li(styli@ucdavis.edu), Xiaotian Zou(xtzou@ucdavis.edu), Gregory B. Pasternack(gpast@ucdavis.edu)
+<strong>Author</strong> Tingyu Li, Xiaotian Zou, Gregory B. Pasternack
 
-<strong>Maintainer</strong> Tingyu Li(styli@ucdavis.edu)
+<strong>Maintainer</strong> Tingyu Li (styli<!-- breaklink -->@ucdavis.edu)
 
-<strong>Description</strong>
+<strong>Description</strong> HEDA is designed to identify hydropeaking events from raw time-series flow record, a rapid flow variantion induced by the hourly-adjusted electricity market. The novelty of HEDA is to use vector angle instead of the first-order derivative to detect change points which not only largely improves the computing efficiency but also accounts for the rate of change of the flow variation. [More details](https://doi.org/10.1016/j.jhydrol.2021.126392)
 
 <strong>License</strong>
 
@@ -30,14 +35,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <strong>Repository</strong> CRAN
 
-<strong>Date/Publication</strong> 2021-04-21
+<strong>Date/Publication</strong> 2021-05-21
 
 ***
 
 ## User Guide
-1. Prior to using this library, users are required to import these packages: <strong>dplyr</strong>, <strong>lubridate</strong>, <strong>zoo</strong>, <strong>ggplot2</strong>.
-2. The input files should be .csv files, and are required to only contain 3 columns, which are site id, date time and parameter value respectively.
+Prior to using this library, four packages needs to install: <strong>dplyr</strong>, <strong>lubridate</strong>, <strong>zoo</strong>, <strong>ggplot2</strong>.
+```{r eval=TRUE, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(zoo)
+library(lubridate)
+library(HEDA)
+```
 
+The input files should be .csv files, and are required to only contain 3 columns, which are site id, datetime and parameter value respectively. Site id is the identification number of gauge stations. Datetime is the date and time of the record. Parameter value refers to the discharge of flow record. 
+```{r eval=TRUE}
+# import the flow data
+HPK_Q <- read.table("D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_WC/CA/11278400.csv", sep = ",",header = TRUE, row.names = NULL)
+head(HPK_Q)
+```
 ***
 
 ## Functions
@@ -46,28 +63,31 @@ HEDA_Tidy        Preprocess the data
 ```
 <strong>Description</strong>
 
-&emsp;Format flow record into hourly record; Split record into dry and wet season data; interpolate and smoothing the record.  
+&emsp;Format flow record into hourly record; Split record by designated season; Interpolate and smooth the record.  
 
 <strong>Usage</strong>
 
-&emsp;<span style= "font-family:Verdana">HEDA_Tidy(dataframe, dirPathForSM, dirPathForWT)</span>
+&emsp;<span style= "font-family:Verdana">HEDA_Tidy(dataframe, season)</span>
 
 <strong>Arguments</strong>
 
 &emsp; <span style= "font-family:Verdana"> dataframe </span> &emsp;&emsp;&emsp; Name of the dataframe to be processed. </br>
-&emsp; <span style= "font-family:Verdana">dirPathForSM </span> &emsp; The directory path where dry season data will be saved.</br>
-&emsp; <span style= "font-family:Verdana">dirPathForWT </span> &emsp; The directory path where wet season data will be saved.</br>
+&emsp; <span style= "font-family:Verdana"> season </span> &emsp; Subset data by season.</br>
+
 
 <strong>Outputs</strong>
 
-&emsp; Output files are generated in the designated directories, with 4 columns containing location id, datatime, parameter value, ann_thre.
+&emsp; Output dataframe has 4 columns containing location id, datatime, parameter value, ann_thre. ann_thre is originally the mean annual discharge. If flow record is subset by season, ann_thre will be the mean discharge of that period.
 
 <strong>Example</strong>
 
-``` {r eval=FALSE}
-df = read.csv(filePath)
-HEDA_Tidy(df, dirPathForSM, dirPathForWt)
+``` {r eval=TRUE}
+# format the time column to time format
+HPK_Q$dateTime <- parse_date_time(HPK_Q$dateTime, "mdy HM")
 
+# clean subset data by season
+hpk_flow_cln = HEDA_Tidy(HPK_Q, season = c(6,7,8,9))
+head(hpk_flow_cln)
 ```
 ***
 
@@ -86,26 +106,23 @@ ReversalCount        Detect hydropeaking events
 
 &emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; Name of the dataframe to be processed. </br>
 &emsp; <span style= "font-family:Verdana">alpha1</span> &emsp;&emsp;&emsp; Default value : 0.03 </br> 
-&emsp; <span style= "font-family:Verdana">theta</span> &emsp;&emsp;&emsp;&emsp; Default value : 60
+&emsp; <span style= "font-family:Verdana">theta</span> &emsp;&emsp;&emsp;&emsp; Default value : 60 degree for m^3^/s, 85 degree for cfs. gamma default value: 1.1 m^3^/s or 40 cfs.
 
 <strong>Outputs</strong>
 
-&emsp; The output csv file will be saved into the directory path specified by dirPathForCt.
+&emsp; Output dataframe has six columns containing location id, datatime, parameter value, ann_thre, vt_degree and dgtag. ann_thre is originally the mean annual discharge. If flow record is subset by season, ann_thre will be the mean discharge of that period. vt_degree is the vector angle between two flow vectors. dgtag is the categorized change points.
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
-alpha1 <- 0.03
-theta <- 60
-df <- read.table(filePath, sep = ",")
-ReversalCount(df, alpha1, theta)
-
+```{r eval=TRUE}
+hpk_flow_cg <- ReversalCount(hpk_flow_cln, alpha1 = 0.03, theta = 85, gamma = 40)
+head(hpk_flow_cg)
 ```
 
 ***
 
 ```
-clean_position        Exclude change points in wrong position
+Clean_position        Exclude change points in wrong position
 ```
 
 <strong>Description</strong>
@@ -114,7 +131,7 @@ clean_position        Exclude change points in wrong position
 
 <strong>Usage</strong>
 
-&emsp; <span style= "font-family:Verdana">clean_position(dataframe, alpha2)</span>
+&emsp; <span style= "font-family:Verdana">Clean_position(dataframe, alpha2)</span>
 
 <strong>Arguments</strong>
 
@@ -127,16 +144,14 @@ clean_position        Exclude change points in wrong position
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
-alpha2 <- 0.3
-df <- clean_position(df, alpha2)
-
+```{r eval=TRUE}
+hpk_flow_cg <- Clean_position(hpk_flow_cg, alpha2 = 0.3)
 ```
 ***
 
 
 ```
-clean_Spt        Clean repeated points
+Clean_Spt        Clean repeated points
 ```
 
 <strong>Description</strong>
@@ -160,16 +175,14 @@ clean_Spt        Clean repeated points
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
-alpha3 <- 0.7
-alpha4 <- 0.5
-df <- clean_Spt(df, alpha3, alpha4)
+```{r eval=TRUE}
+hpk_flow_cg <- Clean_Spt(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
 ```
 
 ***
 
 ```
-clean_conectD        Evaluate difference between peaking and off-peaking discharge
+Clean_conectD        Evaluate difference between peaking and off-peaking discharge
 ```
 
 <strong>Description</strong>
@@ -193,10 +206,8 @@ clean_conectD        Evaluate difference between peaking and off-peaking dischar
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
-alpha3 <- 0.7
-alpha4 <- 0.5
-df <- clean_conectD(df, alpha3, alpha4)
+```{r eval=TRUE}
+hpk_flow_cg <- Clean_conectD(hpk_flow_cg, alpha3 = 0.7, alpha4 = 0.5)
 ```
 ***
 
@@ -218,41 +229,75 @@ HPK_plot        Plot hydrograph
 
 <strong>Outputs</strong>
 
-&emsp; The plot will be presented under the "Plots" tab in RStudio. Users can determine whether to save out the diagram by themselves.
+&emsp; The plot will be presented under the "Plots" tab in RStudio. The plot shows flow in m^3^/s.
 
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
-HPK_plot(df)
+```{r eval=TRUE, fig.width=14}
+## subset the data
+tt = hpk_flow_cg[13100:13400,]
+
+# plot the hydrograph of the subset data
+HPK_plot(tt)
 ```
 ***
 
 ```
-HPK_metrics        Extract metrics
+HpkFrqMgt        Extract frequency and magnitude metrics
 ```
 
 <strong>Description</strong>
 
-&emsp; Extract 15 metrics from the identified hydropeaking events. 
+&emsp; Extract Qpeak, offQpeak, pk_no and pkraio from the identified hydropeaking events. 
 
 <strong>Usage</strong>
 
-&emsp; <span style= "font-family:Verdana">HPK_metrics(dataframe, dirPathForMetrics)</span>
+&emsp; <span style= "font-family:Verdana">HPK_frq_mgt(dataframe)</span>
 
 <strong>Arguments</strong>
 
 &emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; &emsp;&emsp;&emsp;&emsp;Name of the dataframe to be processed. </br>
-&emsp; <span style= "font-family:Verdana">dirPathForMetrics</span>&emsp; Folder path where the result will be stored.
 
 <strong>Outputs</strong>
 
-&emsp; It is stored as a csv file in the working path specified by the user. Because the length of each metric is different, the median value of each metric is set to be the output. However, time-series value of metrics is produced. 
+&emsp; Output dataframe includes time-series values of four metrics. Qpeak is the hydropeaking discharge, offQpeak is base flow, pk_no is the daily number of rise and fall process, pkratio is the ratio of days with hydropeaking to the total number of days analyzed 
 
 
 <strong>Example</strong>
 
 ```{r eval=FALSE}
-dirPathForMetrics <- ".../.../.../"
-HPK_metrics(df, dirPathForMetrics)
+HpkFrqMgt <- HPK_frq_mgt(hpk_flow_cg)
+head(HpkFrqMgt)
+```
+
+
+```
+HpkRtDur        Extract rate of change and duration related metrics
+```
+
+<strong>Description</strong>
+
+&emsp; Extract rate of change and duration related metrics: pk_rtn is the retention of peaking process. offpk_rtn is the retention of base flow. D_rampup/D_ramp is the duration of rise/fall process. RB_Indx_up/RB_Index_dw is the flashness of rise/fall process. Ramp_up/Ramp_dw is the rate of change of rise/fall process. Strange_up/Strange_dw is the standardized rise/fall amplitude.
+
+<strong>Usage</strong>
+
+&emsp; <span style= "font-family:Verdana">HPK_frq_mgt(dataframe)</span>
+
+<strong>Arguments</strong>
+
+&emsp; <span style= "font-family:Verdana">dataframe</span> &emsp; &emsp;&emsp;&emsp;&emsp;Name of the dataframe to be processed. </br>
+
+<strong>Outputs</strong>
+
+&emsp; Output dataframe includes time-series values of four metrics. Qpeak is the hydropeaking discharge, offQpeak is base flow, pk_no is the daily number of rise and fall process, pkratio is the ratio of days with hydropeaking to the total number of days analyzed.
+
+
+<strong>Example</strong>
+
+```{r eval=FALSE}
+HpkRtDur <- HPK_rt_dur(hpk_flow_cg)
+
+# to extract the time-series of one metric withouth missing value
+pk_rtn <- HpkRtDur[na.omit(HpkRtDur$pk_rtn),c("location_id", "datetime","pk_rtn")]
 ```
