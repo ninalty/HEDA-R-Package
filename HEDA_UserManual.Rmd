@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 <strong>Title</strong>    **H**ydropeaking **E**vents **D**etection **A**lgorithm
 
-<strong>Version</strong> 1.0
+<strong>Version</strong> 1.0.0
 
 <strong>Author</strong> Tingyu Li, Xiaotian Zou, Gregory B. Pasternack
 

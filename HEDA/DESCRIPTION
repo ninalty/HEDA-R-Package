@@ -1,12 +1,11 @@
 Package: HEDA
 Type: Package
-Title: What the Package Does (Title Case)
+Title: **H**ydropeaking **E**vents **D**etection **A**lgorithm
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Tingyu Li, Xiaotian Zou, Gregory B. Pasternack
+Maintainer: Tingyu Li <styli@ucdavis.edu>
+Description: HEDA is designed to identify hydropeaking events from raw time-series flow record, a rapid flow variantion induced by the hourly-adjusted electricity market. <br />The novelty of HEDA is to use vector angle instead of the first-order derivative to detect change points which not only largely improves the computing efficiency but also accounts for the rate of change of the flow variation. [More details](https://doi.org/10.1016/j.jhydrol.2021.126392)
+License: MIT
 Encoding: UTF-8
 LazyData: true
 Depends: 
