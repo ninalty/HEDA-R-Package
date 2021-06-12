@@ -57,8 +57,8 @@ PK_time <- function(df){
 # count pk_no
 up_dw_count <- function(df){
 
-  up_no <- df %>% group_by(datetime) %>% filter(up=="up0") %>% count()
-  dw_no <- df %>% group_by(datetime) %>% filter(dw=="dw0") %>% count()
+  up_no <- df %>% group_by(.data$ann_thre) %>% filter(.data$up=="up0") %>% count()
+  dw_no <- df %>% group_by(.data$ann_thre) %>% filter(.data$dw=="dw0") %>% count()
 
   daily_pk_no <- full_join(up_no,dw_no, by="datetime")
 
@@ -89,12 +89,12 @@ PK_Ratio <- function(df1, df2){
 #' @export
 HPK_frq_mgt <- function(df) {
 
-  df <- df %>% mutate(nhour = hour(datetime)) %>% mutate(datetime = as.Date(datetime))
+  df <- df %>% mutate(nhour = hour(.data$datetime)) %>% mutate(datetime = as.Date(.data$datetime))
 
   #Identify the rise and fall process of hydropeaking
   df <- up_dw_ID(df)
 
-  if (length(na.omit(df$up))>2) {
+  if (length(stats::na.omit(df$up))>2) {
 
     # pk_no & pkratio
     HPK_updw_Daily <- up_dw_count(df)
@@ -119,6 +119,6 @@ HPK_frq_mgt <- function(df) {
     hpk_frq_mg = left_join(HPK_updw_Daily, Q_pk_max, by = "datetime")
     hpk_frq_mg = left_join(hpk_frq_mg, Q_pk_min, by = "datetime")
     hpk_frq_mg =  hpk_frq_mg[, c("location_id", "datetime", "Qpeak", "offQpeak","pk_no","pkratio")]
-    hpk_frq_mg$location_id <- unique(na.omit(hpk_frq_mg$location_id))
+    hpk_frq_mg$location_id <- unique(stats::na.omit(hpk_frq_mg$location_id))
   }
   return(hpk_frq_mg)}

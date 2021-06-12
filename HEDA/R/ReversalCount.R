@@ -1,28 +1,28 @@
 
 HPK_Count_Pre <- function(df, alpha1, gamma){
-  # get the datetime a timeformat
+  ## get the datetime a timeformat
   df$datetime <- ymd_hms(df$datetime)
   ## replace the NA value of dift_dis with 0.
-  df <- df %>% mutate(parameter_value = ifelse(is.na(parameter_value), 0, parameter_value))
+  df <- df %>% mutate(parameter_value = ifelse(is.na(.data$parameter_value), 0, .data$parameter_value))
 
-  # cut the head and foot to get rid of small fluctuations
+  ## cut the head and foot to get rid of small fluctuations
   y <- df %>%
-    mutate(flow_90th = quantile(parameter_value, probs = 0.9)) %>%
-    mutate(flow_10th = quantile(parameter_value, probs = 0.1)) %>%
-    mutate(parameter_value = ifelse(parameter_value < flow_90th, parameter_value, flow_90th)) %>%
-    mutate(parameter_value = ifelse(parameter_value > flow_10th, parameter_value, flow_10th)) %>%
-    mutate(dift_dis = lead(parameter_value,1) - parameter_value) %>%
+    mutate(flow_90th = stats::quantile(.data$parameter_value, probs = 0.9)) %>%
+    mutate(flow_10th = stats::quantile(.data$parameter_value, probs = 0.1)) %>%
+    mutate(parameter_value = ifelse(.data$parameter_value < .data$flow_90th, .data$parameter_value, .data$flow_90th)) %>%
+    mutate(parameter_value = ifelse(.data$parameter_value > .data$flow_10th, .data$parameter_value, .data$flow_10th)) %>%
+    mutate(dift_dis = lead(.data$parameter_value,1) - .data$parameter_value) %>%
     ungroup()
 
   ## replace the NA value of dift_dis with 0.
-  y <- y %>% mutate(dift_dis = ifelse(is.na(dift_dis), 0, dift_dis))
+  y <- y %>% mutate(dift_dis = ifelse(is.na(.data$dift_dis), 0, .data$dift_dis))
 
   ## replace the small value of dift_dis with 0.
-  y <- y %>% mutate(dift_dis = ifelse(abs(dift_dis) < gamma, 0, dift_dis))
+  y <- y %>% mutate(dift_dis = ifelse(abs(.data$dift_dis) < gamma, 0, .data$dift_dis))
 
   ## replace didft_dis < ann_thre*0.03, 0.03 was chosen based on the dataset.
   y <- y %>%
-    mutate(dift_dis = ifelse(abs(dift_dis) < ann_thre*alpha1, 0, dift_dis)) %>%
+    mutate(dift_dis = ifelse(abs(.data$dift_dis) < .data$ann_thre*alpha1, 0, .data$dift_dis)) %>%
     ungroup()
 
   return(y)
@@ -61,7 +61,7 @@ add_tag.byYr <- function(df){ #this is included in the vector angle function)
       df$time_step[i] <- t
       t <- t+1
       l=l+1}}
-  df <- df %>% group_by(yr) %>% mutate(time_no=lead(time_step)-time_step) %>% ungroup() # at the end of ech year,I will have an NA
+  df <- df %>% group_by(.data$yr) %>% mutate(time_no = lead(.data$time_step) - .data$time_step) %>% ungroup() # at the end of ech year,I will have an NA
 
   return(df)
 }
@@ -94,10 +94,10 @@ hpk_up_dw <- function(df, theta){
 
   n = nrow(df)
 
-  #differentiate the up and dw pk pts, 2-start of station, 3-end of station
+  # differentiate the up and dw pk pts, 2-start of station, 3-end of station
   df$dgtag <- ifelse(df$vt_degree>theta, ifelse(df$dift_dis == 0, 2 , ifelse(df$dift_dis<0, 3, 1)), 0)
 
-  #find the start point of up
+  # find the start point of up
   for (i in 2:n) {
     if (df$dgtag[i] == 1 & df$dift_dis[i-1] ==0 & !is.na(df$vt_degree[i])) {
       df$dgtag[i] = 4#the start of up

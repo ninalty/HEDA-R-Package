@@ -1,3 +1,5 @@
+#' @import dplyr ggplot2 lubridate zoo
+
 #' @export
 Clean_Spt <- function(df, alpha3 = 0.7, alpha4 = 0.5){
   df <- clean_cotinpt(df, alpha3, alpha4)

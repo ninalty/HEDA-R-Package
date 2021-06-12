@@ -1,3 +1,5 @@
+#' @import dplyr ggplot2 lubridate zoo
+
 #' @export
 Clean_conectD <- function(df, alpha3 = 0.7, alpha4 = 0.5){
 

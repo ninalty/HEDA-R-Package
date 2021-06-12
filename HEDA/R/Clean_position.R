@@ -1,3 +1,5 @@
+#' @import dplyr ggplot2 lubridate zoo
+
 #' @export
 Clean_position <- function(df, alpha2 = 0.3){
 

@@ -1,4 +1,6 @@
+#' @import dplyr ggplot2 lubridate zoo rlang
 
+#' @export
 HEDA_Tidy <- function(df, season) {
   colnames(df) <- c("location_id", "datetime","parameter_value")
 
@@ -18,7 +20,6 @@ HEDA_Tidy <- function(df, season) {
   # get annual threshold
   df$ann_thre <- mean(df$parameter_value, na.rm = TRUE)
 
-
   df <- df[df$mth %in% season,]
 
 
@@ -33,7 +34,7 @@ HEDA_Tidy <- function(df, season) {
     kk_ <- df[is.na(df$parameter_value),]
 
     ## Count how many NA occurs per year per location_id
-    kkt <- kk_ %>% group_by(yr, mth) %>% count()
+    kkt <- kk_ %>% group_by(.data$yr, .data$mth) %>% count()
 
     # for n > 720, that mth should be removed.
     kkt_720 <- kkt %>% filter(n >= 720)
@@ -41,8 +42,7 @@ HEDA_Tidy <- function(df, season) {
     # remove these record
     kk <- anti_join(df,kkt_720, by=c("yr", "mth"))
 
-    #################################################### Interpolation ####################################################################
-
+    #################################################### Interpolation ##################################################
     ##interpolate data
     for (i in 2:nrow(kk)) {
       if (is.na(kk$parameter_value[i])){
@@ -60,7 +60,7 @@ HEDA_Tidy <- function(df, season) {
     }
 
     # keep one flow for one hour
-    kk <- kk %>% group_by(location_id,datetime) %>% mutate(parameter_value = mean(parameter_value)) %>% distinct(parameter_value,ann_thre) %>% ungroup()
+    kk <- kk %>% group_by(.data$location_id, .data$datetime) %>% mutate(parameter_value = mean(.data$parameter_value)) %>% distinct(.data$parameter_value, .data$ann_thre) %>% ungroup()
 
   }
   return(kk)

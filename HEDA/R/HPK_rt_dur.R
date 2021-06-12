@@ -85,7 +85,7 @@ HPK_ramprt_duration <- function(df){
 #' @export
 HPK_rt_dur <- function(df) {
 
-  if (length(na.omit(df$dgtag))>2) {
+  if (length(stats::na.omit(df$dgtag))>2) {
 
     df <-  HPK_ramprt_duration(df)
     df <- df[,c("location_id","datetime", "parameter_value","dgtag","pk_rtn", "offpk_rtn", "D_rampup", "D_rampdw", "RB_Index_up", "RB_Index_dw", "Ramp_up", "Ramp_dw","Strange_up", "Strange_dw")]

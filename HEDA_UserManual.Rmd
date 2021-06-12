@@ -1,7 +1,7 @@
 ---
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 <center><h1>"HEDA" Package</h1></center>
 
@@ -52,7 +52,7 @@ library(HEDA)
 The input files should be .csv files, and are required to only contain 3 columns, which are site id, datetime and parameter value respectively. Site id is the identification number of gauge stations. Datetime is the date and time of the record. Parameter value refers to the discharge of flow record. 
 ```{r eval=TRUE}
 # import the flow data
-HPK_Q <- read.table("D:/Ninalty/UCD_Hydropeaking/HPK_FlowData/HPK_WC/CA/11278400.csv", sep = ",",header = TRUE, row.names = NULL)
+HPK_Q <- HPK_Sample_data
 head(HPK_Q)
 ```
 ***
@@ -244,7 +244,7 @@ HPK_plot(tt)
 ***
 
 ```
-HpkFrqMgt        Extract frequency and magnitude metrics
+Hpk_Frq_Mgt        Extract frequency and magnitude metrics
 ```
 
 <strong>Description</strong>
@@ -266,14 +266,14 @@ HpkFrqMgt        Extract frequency and magnitude metrics
 
 <strong>Example</strong>
 
-```{r eval=FALSE}
+```{r eval=TRUE}
 HpkFrqMgt <- HPK_frq_mgt(hpk_flow_cg)
 head(HpkFrqMgt)
 ```
 
 
 ```
-HpkRtDur        Extract rate of change and duration related metrics
+Hpk_rt_dur        Extract rate of change and duration related metrics
 ```
 
 <strong>Description</strong>

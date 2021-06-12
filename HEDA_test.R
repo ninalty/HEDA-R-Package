@@ -4,12 +4,12 @@ library(zoo)
 library(lubridate)
 
 # import the flow data
-df <- HPK_Sample_data
+df <- HPK_SampleData
 
 
 # clean and interpolate
 ## format the time column to time format
-df1$dateTime <- parse_date_time(df$dateTime, "mdy HM")
+df$dateTime <- parse_date_time(df$dateTime, "mdy HM")
 
 # clean subset data by season
 hpk_flow_sm_cln = HEDA_Tidy(df, season = c(6,7,8,9))
