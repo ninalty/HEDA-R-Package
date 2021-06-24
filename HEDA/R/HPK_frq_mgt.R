@@ -57,8 +57,8 @@ PK_time <- function(df){
 # count pk_no
 up_dw_count <- function(df){
 
-  up_no <- df %>% group_by(.data$ann_thre) %>% filter(.data$up=="up0") %>% count()
-  dw_no <- df %>% group_by(.data$ann_thre) %>% filter(.data$dw=="dw0") %>% count()
+  up_no <- df %>% group_by(.data$datetime) %>% filter(.data$up=="up0") %>% count()
+  dw_no <- df %>% group_by(.data$datetime) %>% filter(.data$dw=="dw0") %>% count()
 
   daily_pk_no <- full_join(up_no,dw_no, by="datetime")
 
