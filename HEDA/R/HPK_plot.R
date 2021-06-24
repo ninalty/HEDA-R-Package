@@ -35,16 +35,16 @@ HPK_plot_main <- function(df, tagpt_color, tagpt_order, tagpt_shape){
 HPK_plot <- function(df){
   # missing point 1
   if(length(unique(df$dgtag)) == 4){
-    tagpt_color <- c(NA, grDevices::rgb(255,0,0, max=255), "black", grDevices::rgb(46,117,182, max=255))
+    tagpt_color <- c(grDevices::rgb(0,0,0, max=255, alpha = 0), grDevices::rgb(255,0,0, max=255), "black", grDevices::rgb(46,117,182, max=255))
     tagpt_order <- c(0,2,3,4)
     tagpt_shape <- c(20, 16, 16, 23)
     HPK_plot_main(df, tagpt_color, tagpt_order, tagpt_shape)
   }
-
+  
   else {
-    tagpt_color <- c(NA, grDevices::rgb(112,173,71, max=255), grDevices::rgb(255,0,0, max=255), "black", grDevices::rgb(46,117,182, max=255))
+    tagpt_color <- c(grDevices::rgb(0,0,0, max=255, alpha = 0), grDevices::rgb(112,173,71, max=255), grDevices::rgb(255,0,0, max=255), "black", grDevices::rgb(46,117,182, max=255))
     tagpt_order <- c(0,1,2,3,4)
     tagpt_shape <- c(20, 24, 16, 16, 23)
-	HPK_plot_main(df, tagpt_color, tagpt_order, tagpt_shape)
+    HPK_plot_main(df, tagpt_color, tagpt_order, tagpt_shape)
   }
 }
