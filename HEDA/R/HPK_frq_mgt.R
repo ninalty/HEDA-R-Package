@@ -119,6 +119,6 @@ HPK_frq_mgt <- function(df) {
     hpk_frq_mg = left_join(HPK_updw_Daily, Q_pk_max, by = "datetime")
     hpk_frq_mg = left_join(hpk_frq_mg, Q_pk_min, by = "datetime")
     hpk_frq_mg =  hpk_frq_mg[, c("location_id", "datetime", "Qpeak", "offQpeak","pk_no","pkratio")]
-    hpk_frq_mg$location_id <- unique(stats::na.omit(hpk_frq_mg$location_id))
+    hpk_frq_mg$location_id <- df$location_id[1]
   }
   return(hpk_frq_mg)}
