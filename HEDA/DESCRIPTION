@@ -8,5 +8,5 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends: 
-    R (>= 3.6), dplyr (>= 1.0.2), ggplot2 (>= 3.1.0), zoo (>= 1.8.7), lubridate (>= 1.7.4), rlang (>= 0.4.11)
+    R (>= 4.0), dplyr (>= 1.0.2), ggplot2 (>= 3.1.0), zoo (>= 1.8.7), lubridate (>= 1.7.4), rlang (>= 0.4.11)
 RoxygenNote: 7.1.1
